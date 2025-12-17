@@ -1,0 +1,14 @@
+<table border="1">
+    <tr>
+        <th>Book</th>
+        <th>Due Date</th>
+        <th>Fine</th>
+    </tr>
+    {% for book in books %}
+    <tr>
+        <td>{{ book.book_name }}</td>
+        <td>{{ book.due_date }}</td>
+        <td>₹ {{ book.fine }}</td>
+    </tr>
+    {% endfor %}
+</table>

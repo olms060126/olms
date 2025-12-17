@@ -1,0 +1,5 @@
+{% include 'libfeature.html' %}
+<form method="post">
+    {% csrf_token %}
+    {{ forms.as_p }}
+</form>

@@ -1,0 +1,189 @@
+{% comment %} {% include 'libfeature.html' %}
+{% include 'tailwind.html' %}
+<h1>Book Details</h1>
+<table border="1">
+    <thead>
+        <tr>
+            <th>ISBN</th>
+            <th>Tittle</th>
+            <th>Author</th>
+            <th>Genre</th>
+            <th>Language</th>
+            <th>No_of_copies</th>
+            <th>available</th>
+            <th>Posessed</th>
+            <th>Reduct/Add (no of copies)</th>
+            <th>Reduce Posessed</th>
+            <th>Delete</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        {% for book in books %}
+            <tr>
+                <td>{{book.ISBN}}</td>
+                <td>{{book.Book_name}}</td>
+                <td>{{book.Authors_name}}</td>
+                <td>{{book.Genre}}</td>
+                <td>{{book.Language}}</td>
+                <td>{{book.No_of_copies}}</td>
+                <td>{{book.Available_books}}</td>
+                <td>{{book.Posessed}}</td>
+                <td>
+                <form action="{% url 'reduct' book.ISBN %}" method="POST" style="display:inline;">
+                    {% csrf_token%}
+                    <button type="submit">Reduct</button>
+                </form>
+                <form action="{% url 'addcount' book.ISBN %}" method="POST" style="display:inline;">
+                    {% csrf_token%}
+                    <button type="submit">Addcount</button>
+                </form>
+                </td>
+                <td>
+                <form action="{% url 'reduceposessed' book.ISBN %}" method="POST" style="display:inline;">
+                    {% csrf_token%}
+                    <button type="submit">ReducePosessed</button>
+                </form>
+                </td>
+                <td>
+                <form action="{% url 'delete' book.ISBN %}" method="POST" style="display:inline;">
+                    {% csrf_token%}
+                    <button type="submit">DELETE</button>
+                </form>
+                </td>
+                <td>
+                <a href="{% url 'edit_book_page' book.ISBN %}">Edit</a>
+                </td>
+                <td>  
+                <a href="{% url 'book_map' book.ISBN %}">Add access_no</a>
+                </td>                 
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'add_book_page' %}">Add New Book</a> {% endcomment %}
+
+
+
+   
+
+
+
+{% include 'libfeature.html' %}
+{% include 'tailwind.html' %}
+
+<div class="bg-gray-100 min-h-screen p-6 text-gray-800 text-sm">
+
+  <!-- HEADER: Book Details + Add New Book on Right -->
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-xl font-semibold">Book Details</h1>
+
+    <a href="{% url 'add_book_page' %}" 
+       class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded">
+      Add New Book
+    </a>
+  </div>
+
+  <!-- TABLE -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-300 divide-y divide-gray-300 bg-white">
+      <thead class="bg-gray-200 text-gray-700 text-xs uppercase">
+        <tr>
+          <th class="px-3 py-2 text-left">ISBN</th>
+          <th class="px-3 py-2 text-left">Title</th>
+          <th class="px-3 py-2 text-left">Author</th>
+          <th class="px-3 py-2 text-left">Genre</th>
+          <th class="px-3 py-2 text-left">Language</th>
+          <th class="px-3 py-2 text-right">No. of copies</th>
+          <th class="px-3 py-2 text-right">Available</th>
+          <th class="px-3 py-2 text-right">Possessed</th>
+          <th class="px-3 py-2 text-center">Reduct/Add</th>
+          <th class="px-3 py-2 text-center">Reduce Possessed</th>
+          <th class="px-3 py-2 text-center">Delete</th>
+          <th class="px-3 py-2 text-center">Edit</th>
+          <th class="px-3 py-2 text-center">Add Access No</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-gray-300">
+        {% for book in books %}
+        <tr class="hover:bg-gray-100">
+          <td class="px-3 py-2">{{ book.ISBN }}</td>
+          <td class="px-3 py-2">{{ book.Book_name }}</td>
+          <td class="px-3 py-2">{{ book.Authors_name }}</td>
+          <td class="px-3 py-2">{{ book.Genre }}</td>
+          <td class="px-3 py-2">{{ book.Language }}</td>
+          <td class="px-3 py-2 text-right">{{ book.No_of_copies }}</td>
+          <td class="px-3 py-2 text-right">{{ book.Available_books }}</td>
+          <td class="px-3 py-2 text-right">{{ book.Posessed }}</td>
+
+          <!-- Reduct / Add -->
+          <td class="px-3 py-2 text-center">
+            <div class="flex justify-center space-x-2">
+
+              <!-- REDUCT -->
+              <form action="{% url 'reduct' book.ISBN %}" method="POST">
+                {% csrf_token %}
+                <button type="submit"
+                  class="bg-gray-300 hover:bg-gray-400 text-gray-800 text-xs px-2 py-1 rounded">
+                  Reduct
+                </button>
+              </form>
+
+              <!-- ADD -->
+              <form action="{% url 'addcount' book.ISBN %}" method="POST">
+                {% csrf_token %}
+                <button type="submit"
+                  class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs px-2 py-1 rounded">
+                  Add
+                </button>
+              </form>
+
+            </div>
+          </td>
+
+          <!-- Reduce Possessed -->
+          <td class="px-3 py-2 text-center">
+            <form action="{% url 'reduceposessed' book.ISBN %}" method="POST">
+              {% csrf_token %}
+              <button type="submit"
+                class="bg-orange-200 hover:bg-orange-300 text-gray-800 text-xs px-2 py-1 rounded">
+                Reduce
+              </button>
+            </form>
+          </td>
+
+          <!-- Delete -->
+          <td class="px-3 py-2 text-center">
+            <form action="{% url 'delete' book.ISBN %}" method="POST">
+              {% csrf_token %}
+              <button type="submit"
+                class="bg-red-200 hover:bg-red-300 text-gray-800 text-xs px-2 py-1 rounded">
+                Delete
+              </button>
+            </form>
+          </td>
+
+          <!-- Edit -->
+          <td class="px-3 py-2 text-center">
+            <a href="{% url 'edit_book_page' book.ISBN %}" 
+               class="text-blue-600 hover:underline text-xs">
+              Edit
+            </a>
+          </td>
+
+          <!-- Add Access -->
+          <td class="px-3 py-2 text-center">
+            <a href="{% url 'book_map' book.ISBN %}" 
+               class="text-green-600 hover:underline text-xs">
+              Add Access No
+            </a>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>

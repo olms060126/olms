@@ -1,0 +1,55 @@
+{% include 'tailwind.html' %}
+
+<!-- Header -->
+<nav class="bg-[#111827] shadow-md"> <!-- Primary dark background -->
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between py-4">
+
+            <!-- Logo / Brand Name -->
+            <div class="text-[#F9FAFB] text-xl font-bold">
+                <h1>OLMS</h1>
+                <h5 class="flex space-x-8 text-[#F9FAFB] font-semibold text-lg">(Online Library Management System)</h5>
+            </div>
+
+            <!-- Navigation Links -->
+            <ul class="flex space-x-8 text-[#F9FAFB] font-semibold text-lg">
+
+                <li>
+                    <a href="{% url 'libhome' %}"
+                       class="hover:text-[#9CA3AF] transition duration-200">
+                        Home
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'bolist' %}"
+                       class="hover:text-[#9CA3AF] transition duration-200">
+                        Books
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'transaction' %}"
+                       class="hover:text-[#9CA3AF] transition duration-200">
+                        Transaction
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'fine' %}"
+                       class="hover:text-[#9CA3AF] transition duration-200">
+                        Fine Details
+                    </a>
+                </li>
+
+                <li>
+                    <a href="{% url 'reservationdetails' %}"
+                       class="hover:text-[#9CA3AF] transition duration-200">
+                        Reservation Details
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>

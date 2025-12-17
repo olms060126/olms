@@ -1,0 +1,156 @@
+{% comment %} {% include 'tailwind.html' %}
+<h1>OLMS</h1>
+<h6>ONLINE LIBRARY MANAGEMENT SYSTEM</h6><br>
+<h2>STUDENT LOGIN</h2>
+<form action="/loginaction" method="POST">
+    {% csrf_token %}
+    {{ forms.User_name.label_tag }} {{ forms.User_name }}<br><br><br>
+    {{ forms.Password.label_tag }} {{ forms.Password }}<br><br>
+    <button type="submit">Login</button><br><br>
+    <a href="{% url 'register' %}">Register</a>
+</form> {% endcomment %}
+
+
+
+{% include 'tailwind.html' %}
+
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200 p-6">
+
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">OLMS</h1>
+            <p class="text-sm text-gray-500">Online Library Management System</p>
+        </div>
+
+        <h2 class="text-xl font-semibold text-center text-gray-700 mb-6">
+            Student Login
+        </h2>
+
+        <form action="/loginaction" method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div>
+                {{ forms.User_name.label_tag }}
+                {{ forms.User_name }}
+            </div>
+
+            <!-- Password -->
+            <div>
+                {{ forms.Password.label_tag }}
+                {{ forms.Password }}
+            </div>
+
+            <button type="submit"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg shadow">
+                Login
+            </button>
+
+            <p class="text-center text-sm text-gray-600">
+                Don’t have an account?
+                <a href="{% url 'register' %}" class="text-indigo-600 hover:underline">
+                    Register
+                </a>
+            </p>
+
+        </form>
+
+    </div>
+</div> 
+
+
+{% comment %} 
+{% load static %}
+{% include 'tailwind.html' %}
+<div class="min-h-screen w-full bg-cover bg-center bg-no-repeat"
+    style="background-image: url('{% static 'images/hh40.jpg' %}');">
+    
+    <div class="min-h-screen flex items-center justify-center bg-cover bg-center ">
+    
+    <div class="w-full max-w-md bg-white/90 backdrop-blur-md rounded-2xl shadow-xl p-8">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">OLMS</h1>
+            <p class="text-sm text-gray-500">Online Library Management System</p>
+        </div>
+
+        <h2 class="text-xl font-semibold text-center text-gray-700 mb-6">
+            Student Login
+        </h2>
+
+        <form action="/loginaction" method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <div>
+                {{ forms.User_name.label_tag }}
+                {{ forms.User_name }}
+            </div>
+
+            <div>
+                {{ forms.Password.label_tag }}
+                {{ forms.Password }}
+            </div>
+
+            <button type="submit"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg">
+                Login
+            </button>
+        </form>
+
+    </div>
+</div> {% endcomment %}
+
+{% comment %} {% load static %}
+{% include 'tailwind.html' %}
+
+<style>
+    body {
+        background-image: url("{% static 'images/background.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+    }
+</style>
+
+<div class="min-h-screen flex items-center justify-center bg-black/40">
+
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">OLMS</h1>
+            <p class="text-sm text-gray-500">Online Library Management System</p>
+        </div>
+
+        <h2 class="text-xl font-semibold text-center text-gray-700 mb-6">
+            Student Login
+        </h2>
+
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <div>
+                {{ forms.User_name.label_tag }}
+                {{ forms.User_name }}
+            </div>
+
+            <div>
+                {{ forms.Password.label_tag }}
+                {{ forms.Password }}
+            </div>
+
+            <button type="submit"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-lg">
+                Login
+            </button>
+        </form>
+
+    </div>
+</div> {% endcomment %}
+
+
+
+
+
+

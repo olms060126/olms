@@ -1,0 +1,15 @@
+{% comment %} {% include 'libfeature.html' %}
+<form method="post" action="isbnmap">
+    {% csrf_token %}
+    {{ mapped.as_p }}
+    <button type="submit">Submit</button>
+
+</form> {% endcomment %}
+
+<h2>Add Access Number for {{ book.Book_name }} (ISBN: {{ book.ISBN }})</h2>
+
+<form method="POST" action="{% url 'isbnmap_action' book.ISBN %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>

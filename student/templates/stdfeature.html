@@ -1,0 +1,63 @@
+{% comment %} {% include 'tailwind.html' %}
+<div>
+    <ul>
+    
+        <li><a href ="{% url 'book_list' %}"> BOOKS</a></li>
+        <li><a href ="{% url 'register' %}"> REGISTER</a></li>
+        <li><a href ="{% url 'sthome' %}"> HOME</a></li>
+        <li><a href ="{% url 'login' %}"> LOGIN</a></li>
+        <li><a href ="{% url 'myreservations' %}"> MY RESERVATION</a></li>
+        </ul>
+</div> 
+ {% endcomment %}
+{% include 'tailwind.html' %}
+
+<!-- NAVIGATION BAR -->
+<nav class="bg-[#111827] shadow-md">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between py-4">
+
+            <!-- Student Portal Title -->
+            <div class="text-[#F9FAFB] text-xl font-bold">
+                <h1>Student Portal</h1>
+            </div>
+
+            <!-- Navigation Menu -->
+            <ul class="flex space-x-8 text-[#F9FAFB] font-semibold text-lg">
+
+                
+                <li>
+                    <a href="{% url 'sthome' %}" class="hover:text-[#9CA3AF] transition duration-200">Home</a>
+                </li>
+                <li>
+                    <a href="{% url 'book_list' %}" class="hover:text-[#9CA3AF] transition duration-200">Books</a>
+                </li>
+
+                <li>
+                    <a href="{% url 'register' %}" class="hover:text-[#9CA3AF] transition duration-200">Register</a>
+                </li>
+
+                <li>
+                    <a href="{% url 'login' %}" class="hover:text-[#9CA3AF] transition duration-200">Login</a>
+                </li>
+
+                <li>
+                    <a href="{% url 'myreservations' %}" class="hover:text-[#9CA3AF] transition duration-200">My Reservations</a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN CONTENT BLOCK -->
+<div id="main-content" class="max-w-7xl mx-auto mt-8 px-4">
+    {% block content %}
+    <!-- Page-specific content will go here -->
+    {% endblock %}
+</div>
+
+
+
+
+

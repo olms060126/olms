@@ -1,0 +1,64 @@
+{% comment %} {% include 'stdfeature.html' %}
+<h1>My Reservations</h1>
+
+<table border="1">
+    <tr>
+        <th>Book</th>
+        <th>Reserved Time</th>
+        <th>Status</th>
+    </tr>
+
+    {% for rr in resd %}
+    <tr>
+        <td>{{ rr.book }}</td>
+        <td>{{ rr.reserved_at }}</td>
+        <td>{{ rr.status }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="3">You have no reservations</td>
+    </tr>
+    {% endfor %}
+</table> {% endcomment %}
+
+{% include 'stdfeature.html' %}
+
+<h1>My Reservations</h1>
+
+<style>
+    table {
+        border-collapse: collapse;
+        width: 70%;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #000;
+        padding: 10px 15px;   /* SPACE between text and borders */
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+
+<table>
+    <tr>
+        <th>Book</th>
+        <th>Reserved Time</th>
+        <th>Status</th>
+    </tr>
+
+    {% for rr in resd %}
+    <tr>
+        <td>{{ rr.book }}</td>
+        <td>{{ rr.reserved_at }}</td>
+        <td>{{ rr.status }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="3">You have no reservations</td>
+    </tr>
+    {% endfor %}
+</table>

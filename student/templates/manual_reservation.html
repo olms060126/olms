@@ -1,0 +1,108 @@
+{% extends 'stdfeature.html' %}
+
+{% block content %}
+
+<style>
+    .page-container {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        margin-top: 30px;
+    }
+
+    .reserve-box {
+        width: 400px;
+        padding: 25px;
+        border: 2px solid #af4c4cff;
+        border-radius: 10px;
+        background-color: #fff9f9ff;
+        text-align: center;
+    }
+
+    /* H2 heading styling (no green background) */
+    .reserve-title {
+        font-size: 24px;   /* h2 size */
+        margin-bottom: 15px;
+    }
+
+    .book-name {
+        font-style: italic;   /* italic book name */
+        color: #333;
+    }
+
+    .reserve-btn {
+        background-color: #af4c5cff;
+        color: white;
+        padding: 12px 25px;
+        font-size: 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .reserve-btn:hover {
+        background-color: #a09e45ff;
+        transform: scale(1.05);
+    }
+
+    .reserve-btn:active {
+        transform: scale(0.98);
+    }
+</style>
+
+<div class="page-container">
+    <div class="reserve-box">
+
+        <h2 class="reserve-title">
+            Reserve Book:
+            <span class="book-name">{{ book.Book_name }}</span>
+        </h2>
+
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="reserve-btn">Reserve</button>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+
+
+
+
+{% comment %} {% extends 'stdfeature.html' %}
+
+{% block content %}
+<h2>Reserve Book: {{ book.Book_name }}</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Reserve</button>
+</form>
+
+{% endblock %} {% endcomment %}
+
+
+
+
+
+
+{% comment %} <h2>Reserve Book: {{ book.Book_name }}</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Reserve</button>
+</form> {% endcomment %}
+
+
+
+

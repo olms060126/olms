@@ -1,0 +1,66 @@
+{% comment %} {% include 'tailwind.html' %}
+<h1>OLMS</h1>
+<h6>ONLINE LIBRARY MANAGEMENT SYSTEM</h6><br>
+<h2>LIBRARIAN LOGIN</h2>
+<form action="/loginaction" method="POST">
+    {% csrf_token %}
+    {{ forms.User_name.label_tag }} {{ forms.User_name }}<br><br><br>
+    {{ forms.Password.label_tag }} {{ forms.Password }}<br><br>
+    <button type="submit">Login</button><br><br>
+    <a href="{% url 'libregistration' %}">Register</a>
+</form> {% endcomment %}
+
+{% load widget_tweaks %}
+{% include 'tailwind.html' %}
+
+<body class="min-h-screen bg-gray-100 flex items-center justify-center">
+
+    <div class="bg-white shadow-lg rounded-lg w-full max-w-md p-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-blue-600">OLMS</h1>
+            <p class="text-sm text-gray-500">
+                ONLINE LIBRARY MANAGEMENT SYSTEM
+            </p>
+        </div>
+
+        <!-- Login Title -->
+        <h2 class="text-xl font-semibold text-center text-gray-700 mb-6">
+            Librarian Login
+        </h2>
+
+        <!-- Login Form -->
+        <form action="/libloginaction" method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div>
+                {{ forms.User_name.label_tag }}
+                {{ forms.User_name|add_class:"w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+            </div>
+
+            <!-- Password -->
+            <div>
+                {{ forms.Password.label_tag }}
+                {{ forms.Password|add_class:"w-full mt-1 px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" }}
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit"
+                class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition">
+                Login
+            </button>
+        </form>
+
+        <!-- Register Link -->
+        <p class="text-center text-sm text-gray-600 mt-6">
+            Don’t have an account?
+            <a href="{% url 'libregistration' %}" class="text-blue-600 hover:underline font-medium">
+                Register
+            </a>
+        </p>
+
+    </div>
+
+</body>

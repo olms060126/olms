@@ -1,0 +1,8 @@
+<h2>Edit Book: {{ book.Book_name }}</h2>
+
+<form method="POST" action="{% url 'update_book' book.ISBN %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button type="submit">Save Changes</button>
+</form>

@@ -1,0 +1,157 @@
+{% comment %} <h2>Add New Book & Access Number</h2>
+
+<form method="POST" action="{% url 'add_book_action' %}">
+    {% csrf_token %}
+
+    <h4>Book Details</h4>
+
+    <label>Book Name:</label>
+    {{ form.Book_name }}
+    <br><br>
+
+    <label>Author's Name:</label>
+    {{ form.Authors_name }}
+    <br><br>
+
+    <label>ISBN:</label>
+    {{ form.ISBN }}
+    <br><br>
+
+    <label>Genre:</label>
+    {{ form.Genre }}
+    <br><br>
+
+    <label>Language:</label>
+    {{ form.Language }}
+    <br><br>
+
+    <label>Total Copies:</label>
+    {{ form.No_of_copies }}
+    <br><br>
+
+    <label>Available Books:</label>
+    {{ form.Available_books }}
+    <br><br>
+
+    <label>Possessed Books:</label>
+    {{ form.Possessed }}
+    <br><br>
+
+    <hr>
+
+    <h4>Book Copy (Access Number)</h4>
+
+    <label>Access Number:</label>
+    {{ form.Access_no }}
+    <br><br>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+</form> {% endcomment %}
+
+
+{% include 'stdfeature.html' %}
+{% include 'tailwind.html' %}
+
+<div class="min-h-screen bg-white flex justify-center px-6 py-10 text-gray-800">
+    
+    <div class="w-full max-w-3xl bg-white shadow-lg border border-gray-300 rounded-2xl p-10">
+
+        <h2 class="text-2xl font-semibold text-gray-900 mb-8 text-center">
+            Add New Book & Access Number
+        </h2>
+
+        <!-- Add enctype for file upload -->
+        <form method="POST" action="{% url 'add_book_action' %}" class="space-y-8" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Book Details Section -->
+            <div>
+                <h4 class="text-xl font-semibold text-gray-700 mb-4">Book Details</h4>
+
+                <div class="space-y-4">
+
+                    <div>
+                        <label class="block font-medium mb-1">Book Name:</label>
+                        {{ form.Book_name }}
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-1">Author's Name:</label>
+                        {{ form.Authors_name }}
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-1">ISBN:</label>
+                        {{ form.ISBN }}
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-1">Genre:</label>
+                        {{ form.Genre }}
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-1">Language:</label>
+                        {{ form.Language }}
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-1">Total Copies:</label>
+                        {{ form.No_of_copies }}
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-1">Available Books:</label>
+                        {{ form.Available_books }}
+                    </div>
+
+                    <div>
+                        <label class="block font-medium mb-1">Possessed Books:</label>
+                        {{ form.Posessed }}
+                    </div>
+
+                    <!-- New Cover Image Section -->
+                    <div>
+                        <label class="block font-medium mb-1">Book Cover:</label>
+                        {{ form.cover}}
+                    </div>
+                    <div>
+                        <label class="block font-medium mb-1">Book Description:</label>
+                        {{ form.description}}
+                    </div>
+
+                </div>
+            </div>
+
+            <hr class="my-6 border-gray-300">
+
+            <!-- Book Access Section -->
+            <div>
+                <h4 class="text-xl font-semibold text-gray-700 mb-4">Book Copy (Access Number)</h4>
+
+                <div>
+                    <label class="block font-medium mb-1">Access Number:</label>
+                    {{ form.Access_no }}
+                </div>
+            </div>
+
+            <div class="pt-4 text-center">
+                <button type="submit"
+                        class="bg-gray-800 hover:bg-gray-900 text-white px-8 py-2 rounded-lg shadow-md transition">
+                    Save
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<style>
+    /* Apply Tailwind utilities to Django-generated inputs */
+    input, select, textarea {
+        @apply w-full px-3 py-2 border border-gray-300 rounded-lg 
+               focus:ring-2 focus:ring-gray-800 focus:border-gray-800;
+    }
+</style>

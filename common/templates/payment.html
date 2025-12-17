@@ -1,0 +1,7 @@
+<form action="{% url 'pay_action' %}" method='post'>
+    {% csrf_token %}
+    <label>Please enter the amount</label>
+    <input type="number" name="amount" id="">
+    <button type="submit">pay</button>
+{% comment %} #chatgpt {% endcomment %}
+</form>

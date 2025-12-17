@@ -1,0 +1,112 @@
+{% comment %} {% include 'libfeature.html' %}
+<h1>RESERVATION DETAILS</h1>
+
+<table border="1">
+    <tr>
+        <th>Student Id</th>
+        <th>Book</th>
+        <th>Reserved Time</th>
+        <th>Status</th>
+        <th>Approve</th>
+    </tr>
+
+    {% for r in reservations %}
+    <tr>
+        <td>{{ r.student }}</td>
+        <td>{{ r.book }}</td>
+        <td>{{ r.reserved_at }}</td>
+        <td>{{ r.status }}</td>
+        <td>
+        <form action="{% url 'approve_reservation' r.id %}" method="POST" style="display:inline;">
+            {% csrf_token%}
+            <button type="submit">Approve</button>
+        </form>
+        <form action="{% url 'reject_reservation' r.id %}" method="POST" style="display:inline;">
+            {% csrf_token%}
+            <button type="submit">Not Approved</button>
+        </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table> {% endcomment %}
+
+
+{% include 'libfeature.html' %}
+
+<div class="bg-white min-h-screen p-8">
+
+    <!-- Page Title -->
+    <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+        Reservation Details
+    </h1>
+
+    <!-- Table Container -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-300 rounded-lg shadow bg-white">
+
+            <!-- Table Header -->
+            <thead class="bg-gray-100 border-b border-gray-300">
+                <tr>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-800">Student ID</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-800">Book</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-800">Reserved Time</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-800">Status</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-800">Action</th>
+                </tr>
+            </thead>
+
+            <!-- Table Body -->
+            <tbody>
+                {% for r in reservations %}
+                <tr class="border-b border-gray-200 hover:bg-gray-50 transition duration-150">
+
+                    <td class="px-6 py-3 text-gray-900">{{ r.student }}</td>
+
+                    <td class="px-6 py-3 text-gray-900">{{ r.book }}</td>
+
+                    <td class="px-6 py-3 text-gray-900">
+                        {{ r.reserved_at|date:"Y-m-d H:i" }}
+                    </td>
+
+                    <td class="px-6 py-3">
+                        {% if r.status == "Approved" %}
+                            <span class="text-green-600 font-semibold">Approved</span>
+                        {% elif r.status == "Not Approved" %}
+                            <span class="text-red-600 font-semibold">Not Approved</span>
+                        {% else %}
+                            <span class="text-yellow-600 font-semibold">Pending</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="px-6 py-3 flex gap-2">
+
+                        <!-- Approve Button -->
+                        <form action="{% url 'approve_reservation' r.id %}" method="POST">
+                            {% csrf_token %}
+                            <button
+                                type="submit"
+                                class="px-4 py-1 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm shadow">
+                                Approve
+                            </button>
+                        </form>
+
+                        <!-- Reject Button -->
+                        <form action="{% url 'reject_reservation' r.id %}" method="POST">
+                            {% csrf_token %}
+                            <button
+                                type="submit"
+                                class="px-4 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm shadow">
+                                Not Approved
+                            </button>
+                        </form>
+
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>

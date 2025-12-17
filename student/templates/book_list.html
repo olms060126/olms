@@ -1,0 +1,78 @@
+{% comment %} {% include 'stdfeature.html' %}
+<h1>Books</h1>
+
+<table border="1">
+    <tr>
+        <th>Book</th>
+        <th>Author</th>
+        <th>Available</th>
+        <th>Genre</th>
+        <th>Reserve</th>
+    </tr>
+
+    {% for b in books %}
+    <tr>
+        <td>{{ b.Book_name }}</td>
+        <td>{{ b.Authors_name }}</td>
+        <td>{{ b.Available_books }}</td>
+        <td>{{ b.Genre }}</td>
+        <td>
+        <a href="{% url 'reserve_book_manual' b.ISBN %}">Reserve</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table> {% endcomment %}
+
+
+{% include 'stdfeature.html' %}
+
+<div class="bg-white min-h-screen p-8">
+
+    <!-- Page Title -->
+    <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">
+        Books
+    </h1>
+
+    <!-- Table Container -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-300 rounded-lg shadow-sm bg-white">
+
+            <!-- Table Header -->
+            <thead class="bg-gray-100 border-b border-gray-300">
+                <tr>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-800">Book</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-800">Author</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-800">Available</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-800">Genre</th>
+                    <th class="px-6 py-3 text-left font-semibold text-gray-800">Reserve</th>
+                </tr>
+            </thead>
+
+            <!-- Table Body -->
+            <tbody>
+                {% for b in books %}
+                <tr class="border-b border-gray-200 hover:bg-gray-50 transition duration-150">
+
+                    <td class="px-6 py-3 text-gray-900">{{ b.Book_name }}</td>
+
+                    <td class="px-6 py-3 text-gray-900">{{ b.Authors_name }}</td>
+
+                    <td class="px-6 py-3 text-gray-900">{{ b.Available_books }}</td>
+
+                    <td class="px-6 py-3 text-gray-900">{{ b.Genre }}</td>
+
+                    <td class="px-6 py-3">
+                        <a href="{% url 'reserve_book_manual' b.ISBN %}"
+                           class="text-blue-600 hover:text-blue-800 font-semibold transition duration-150">
+                           Reserve
+                        </a>
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
