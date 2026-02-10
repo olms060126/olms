@@ -4,7 +4,7 @@ from .import views
 urlpatterns = [
     path('sthome', views.sthome, name='sthome'),
     path('register', views.registration, name='register'), 
-    path('login', views.login, name='login'),
+    path('student/login', views.login, name='student_login'),
     path('book_list', views.book_list, name='book_list'),
     path("reserve/<str:ISBN>", views.reserve_book_manual, name="reserve_book_manual"),
     path("myreservations", views.my_reservations, name="myreservations"),

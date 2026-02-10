@@ -1,0 +1,73 @@
+{# include this wherever you want the toasts to appear (e.g., right after <body>) #}
+<style>
+/* container */
+#toast-container {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+
+  pointer-events: none; 
+}
+
+/* toast base */
+.toast-item {
+  min-width: 240px;
+  max-width: 360px;
+  padding: .6rem .9rem;
+  border-radius: .5rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  color: white;
+  font-weight: 600;
+
+  opacity: 0;
+  transform: translateX(16px);
+  animation: toast-anim 5s ease forwards;
+
+  pointer-events: auto; /
+}
+
+/* stagger subsequent toasts slightly */
+#toast-container .toast-item:nth-child(1) { animation-delay: 0s; }
+#toast-container .toast-item:nth-child(2) { animation-delay: 0.12s; }
+#toast-container .toast-item:nth-child(3) { animation-delay: 0.24s; }
+#toast-container .toast-item:nth-child(4) { animation-delay: 0.36s; }
+#toast-container .toast-item:nth-child(5) { animation-delay: 0.48s; }
+/* add more nth-child rules if you expect many at once */
+
+/* colors by tag (customize) */
+.toast-success { background: #16a34a; } /* green-600 */
+.toast-error   { background: #dc2626; } /* red-600 */
+.toast-warning { background: #d97706; } /* amber-600 */
+.toast-info    { background: #2563eb; } /* blue-600 */
+
+/* animation keyframes: fade in, stay, fade out & slide */
+@keyframes toast-anim {
+  0%   { opacity: 0; transform: translateX(16px); }
+  10%  { opacity: 1; transform: translateX(0); }
+  80%  { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(16px); }
+}
+
+/* optional small text wrap */
+.toast-item .toast-text { display: inline-block; line-height: 1.2; }
+</style>
+
+<div id="toast-container" aria-live="polite" aria-atomic="true">
+  {% for message in messages %}
+    <div class="toast-item
+                {% if 'success' in message.tags %}toast-success{% elif 'error' in message.tags %}toast-error{% elif 'warning' in message.tags %}toast-warning{% else %}toast-info{% endif %}">
+      <span class="toast-text">{{ message }}</span>
+    </div>
+  {% endfor %}
+</div>
+
+
+<script>
+  document.querySelectorAll('.toast-item').forEach(el => {
+    setTimeout(() => el.remove(), 5200);
+  });
+</script>

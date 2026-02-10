@@ -1,52 +1,117 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from common.models import Registration, Book_details, Reservation,Book_specefic, Transaction_table, BookIssue
-from common.forms import Book_detailsform, Transactionform, Fineform, Book_speceficform, BookEditForm, BookCombinedForm, Registrationform
-
+from common.models import Registration, Book_details, Reservation,Book_copy, Transaction_table,Librarian
+from common.forms import Book_detailsform,LibrarianForm
+from django.contrib import messages
+from django.db.models import Q,Count
+from django.db import transaction
 
 from django.db.models import F
 
-def bookinfo(request):
-    msg = ""
-    if request.method == "POST":
-        forms= Book_detailsform(request.POST)
-        if forms.is_valid():
-            forms.save()
 
-            return HttpResponse("entered succesfully")
-        else:
-            return HttpResponse("unsuccessful")
-    else:
-        forms= Book_detailsform()
-        return render(request, 'bookinfo.html',{'forms':forms, "msg":msg})
-
-
-def transaction_details(request):
-    ret= Transactionform
-    return render(request, 'transaction.html',{'forms':ret})
-def trans(request):
+#Login logics
+def lib_login(request):
+    form = LibrarianForm()
     if request.POST:
-        ret=Transactionform(request.POST)
-        if ret.is_valid():
-            ret.save()
-            return HttpResponse("transaction complete")
-        else:
-            return HttpResponse("transaction incomplete")
+        user_name = request.POST.get('user_name')
+        password = request.POST.get('password')
+        print(user_name,password)
+        try:
+            librarian = get_object_or_404(
+                Librarian,
+                user_name=user_name,
+                password=password
+            )
+            return redirect('lib_home')
+        except Exception as e:
+            messages.error(request,f"Invalid credentials {str(e)}")
+    return render(request,'librarian/liblogin.html',{'forms':form})
+            
 
-def fine_details(request):
-    res= Fineform
-    return render(request, 'fine.html',{'forms':res})
+#home page of librarian
+def lib_home(request):
+    stats = [
+        ("Books", Book_details.objects.count()),
+        ("Copies", Book_copy.objects.count()),
+        ("Available", Book_copy.objects.filter(is_available=True).count()),
+        ("Issued", Transaction_table.objects.filter(status="NOT_RETURNED").count()),
+        ("Students", Registration.objects.count()),
+        ("Pending", Reservation.objects.filter(status="PENDING").count()),
+    ]
 
-def libhome(request):
-    return render(request, 'libhome.html')
+    context = {
+        "stats": stats,
+        "available_copies": Book_copy.objects.filter(is_available=True).count(),
+        "issued_books": Transaction_table.objects.filter(status="NOT_RETURNED").count(),
+        "total_books": Book_details.objects.count(),
+        "total_copies": Book_copy.objects.count(),
+        "total_students": Registration.objects.count(),
+        "pending_reservations": Reservation.objects.filter(status="PENDING").count(),
+    }
+    return render(request,'librarian/libhome.html',context)
 
-def bolist(request):
-    books=Book_details.objects.all()
-    return render(request, 'bolist.html', {'books':books})
 
-def reservationdetails(request):
-    reservations = Reservation.objects.all()
-    return render(request, "reservationdetails.html", {"reservations": reservations})
+#add books
+def lib_logout(request):
+    request.session.flush()
+    return redirect('home')
+
+
+def add_book(request):
+    if request.method == "POST":
+        form = Book_detailsform(request.POST, request.FILES)
+        try:
+            if form.is_valid():
+                copies = form.cleaned_data.pop("number_of_copies")
+
+                with transaction.atomic():
+                    book = form.save()
+
+                    Book_copy.objects.bulk_create([
+                    Book_copy(book=book)
+                    for _ in range(copies)
+                 ])
+            messages.info(request,f"{request.POST.get('Book_name')} added to collection")
+            return redirect("add_book")
+        except Exception as e:
+            messages.error(request,"failed to add {e}")
+    form = Book_detailsform()
+    return render(request, "librarian/bookinfo.html", {"forms": form})
+
+
+
+def list_books(request):
+    query = request.GET.get("q", "").strip()
+
+    books = (
+        Book_details.objects
+        .annotate(
+            total_copies=Count("copies"),
+            available_copies=Count(
+                "copies",
+                filter=Q(copies__is_available=True)
+            )
+        )
+    )
+
+    if query:
+        books = books.filter(
+            Q(ISBN__icontains=query) |
+            Q(Book_name__icontains=query)
+        )
+
+    context = {
+        "books": books,
+        "query": query,
+        "total_books": Book_details.objects.count(),
+    }
+
+    return render(request, "librarian/bolist.html", context)
+
+
+
+
+
 
 def approve_reservation(request, id):
     reservation= get_object_or_404(Reservation, id=id)
@@ -62,6 +127,7 @@ def approve_reservation(request, id):
             ) 
     return redirect("reservationdetails")
 
+
 def notapprove_reservation(request, id):
     reservation= get_object_or_404(Reservation, id=id)
     
@@ -76,44 +142,8 @@ def notapprove_reservation(request, id):
             ) 
     return redirect("reservationdetails")
 
-def liblogin(request):
-    forms= Registrationform()
-    return render(request, 'liblogin.html',{'forms':forms})
-
-def libregistration(request):
-    forms= Registrationform()
-    return render(request, 'libregistration.html',{'forms':forms})
 
 
-
-# def approve_reservation(request, id):
-#     reservation = get_object_or_404(Reservation, id=id)
-
-#     active_count = Reservation.objects.filter(
-#         student=reservation.student,
-#         status__in=["Pending", "Approved"]  
-#     ).count()
-
-#     if active_count >= 2:
-
-#         from django.contrib import messages
-#         messages.error(request, "This student already has 2 active reservations.")
-#         return redirect("reservation_details")
-
-
-#     if reservation.status == "Pending":
-#         reservation.status = "Approved"
-#         reservation.save()
-
-#         book = Book_details.objects.get(ISBN=reservation.book.ISBN)
-
-#         if book.Available_books > 0:
-#             Book_details.objects.filter(ISBN=reservation.book.ISBN).update(
-#                 Available_books=F('Available_books') - 1,
-#                 Posessed=F('Posessed') + 1
-#             )
-
-#     return redirect("reservation_details")
 
 
 def reject_reservation(request, id):
@@ -130,6 +160,7 @@ def reducecount(request, ISBN):
                 Available_books= F('Available_books') - 1
             ) 
     return redirect("bolist")
+
 def addcount(request, ISBN):
     count=get_object_or_404(Book_details, ISBN=ISBN)
     Book_details.objects.filter(ISBN=ISBN).update(
@@ -137,6 +168,7 @@ def addcount(request, ISBN):
         Available_books= F('Available_books') + 1
         ) 
     return redirect("bolist")
+
 def reduceposessed(request, ISBN):
     count=get_object_or_404(Book_details, ISBN=ISBN)
     if count.Posessed >= 1:
@@ -144,50 +176,33 @@ def reduceposessed(request, ISBN):
             Posessed= F('Posessed') - 1,
         ) 
     return redirect("bolist")
+
 def delete(request, ISBN):
     book=get_object_or_404(Book_details, ISBN=ISBN)
     if request.method=='POST':
         book.delete()
     return redirect("bolist")
 
-# def bookmap(request):
-#     mapped= Book_speceficform()
-#     return render(request, 'isbnmap.html',{'mapped':mapped})
 
-# def isbnmap(request):
-#     if request.method == "POST":
-#         mapped= Book_speceficform(request.POST)
-#         if mapped.is_valid():
-#             mapped.save()
-
-#             return HttpResponse("registration_success")
-
-#     else:
-#         return HttpResponse("registration_success")
-    
-# def my_reservations(request):
-#     Roll_no=request.session.get("Roll_no")
-#     resd= Reservation.objects.filter(student_id=Roll_no)
-#     return render(request, "my_reservations.html", {"resd":resd})
 
 
 
 def edit_book_page(request, ISBN):
     book = get_object_or_404(Book_details, ISBN=ISBN)
-    form = BookEditForm(instance=book)
+    form = Book_detailsform()
     return render(request, 'edit_book.html', {'form': form, 'book': book})
 
 def update_book(request, ISBN):
     book = get_object_or_404(Book_details, ISBN=ISBN)
 
     if request.method == "POST":
-        form = BookEditForm(request.POST, instance=book)
+        form = Book_detailsform(request.POST,)
         if form.is_valid():
             form.save()
             return redirect('bolist')  
 
     
-    form = BookEditForm(request.POST, instance=book)
+    form = Book_detailsform(request.POST,)
     return render(request, 'librarian/edit_book.html', {'form': form, 'book': book})
 
 
@@ -195,16 +210,15 @@ def update_book(request, ISBN):
 
 
 
-def add_book_page(request):
-    form = BookCombinedForm()
-    return render(request, "add_book_and_copy.html", {"form": form})
+
+
 
 def add_book_action(request):
     if request.method != "POST":
         return redirect("add_book_page")  # redirect if GET
 
     # include request.FILES to handle uploaded files
-    form = BookCombinedForm(request.POST, request.FILES)
+    form = Book_detailsform(request.POST, request.FILES)
 
     if form.is_valid():
         # Save Book_details including cover
@@ -222,7 +236,7 @@ def add_book_action(request):
 
         )
         # Save Book_specefic
-        Book_specefic.objects.create(
+        Book_copy.objects.create(
             Access_no=form.cleaned_data["Access_no"],
             ISBN=book,
         )
@@ -233,14 +247,14 @@ def add_book_action(request):
 
 def bookmap(request, ISBN):
     book = Book_details.objects.get(ISBN=ISBN)
-    form = Book_speceficform()
+    form = Book_copy()
     return render(request, 'isbnmap.html', {'form': form, 'book': book})
 
 def isbnmap_action(request, ISBN):
     book = Book_details.objects.get(ISBN=ISBN)
 
     if request.method == "POST":
-        form = Book_speceficform(request.POST)
+        form = Book_copy(request.POST)
         if form.is_valid():
             obj = form.save(commit=False)
 
@@ -255,23 +269,6 @@ def isbnmap_action(request, ISBN):
 def show_transaction(request):
     transactions = (Transaction_table.objects.select_related('Owned_by','Access_no', 'Access_no__ISBN').all())
     return render(request, 'show_transactions.html',{'transactions': transactions})
-
-def libregistration_success (request):
-    form = Registrationform()
-    return render(request, "libregistration_success.html", {"form": form})
-
-
-
-
-
-def issued_books(request):
-    books = BookIssue.objects.all()
-    
-    for book in books:
-        book.fine = book.calculate_fine()
-
-    return render(request, 'issued_books.html', {'books': books})
-
 
 
 

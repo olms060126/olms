@@ -2,32 +2,21 @@ from django.urls import path
 from .import views 
 
 urlpatterns = [
-    path('bookinfo', views.bookinfo, name='bookinfo'),
-    path('transaction', views.transaction_details, name='transaction'),
-    path('fine', views.fine_details, name='fine'),
-    path('libhome', views.libhome, name='libhome'),
-    path('bolist', views.bolist, name='bolist'),
-    path('reservationdetails', views.reservationdetails, name='reservationdetails'),
-    # path('map', views.bookmap, name='map'),
+    #login urls
+    path("librarian/login",views.lib_login,name="lib_login"),
+    path('librarian/home',views.lib_home,name="lib_home"),
+    path('librarian/logout',views.lib_logout,name="lib_logout"),
+   
+    #books related urls
+    path('librarian/add_book',views.add_book,name="add_book"),
+    path("booklist",views.list_books,name='listofbooks'),
     path('edit-book/<str:ISBN>/', views.edit_book_page, name='edit_book_page'),
     path('update-book/<str:ISBN>/', views.update_book, name='update_book'),
-    path("add-book/", views.add_book_page, name="add_book_page"),
-    path("add-book/save/", views.add_book_action, name="add_book_action"),
     
     path("show_transaction", views.show_transaction, name="show_transaction"),
-    path("liblogin", views.liblogin, name="liblogin"),
-    path("libregistration", views.libregistration, name="libregistration"),
-    path("issued_books", views.issued_books, name="issued_books"),
-    path("libregistrationsuccess", views.libregistration_success, name="libregistrationsuccess"),
     
     path("book/map/<str:ISBN>/", views.bookmap, name="book_map"),
     path("book/map/<str:ISBN>/save/", views.isbnmap_action, name="isbnmap_action"),
-
-
-
-    path('libloginaction', views.librarian_login, name='libloginaction'),
-
-    path('trans', views.trans, name='trans'),
     path('approve/<int:id>/', views.approve_reservation, name='approve_reservation'),
     path('reject/<int:id>/', views.reject_reservation, name='reject_reservation'),
     path('addcount/<str:ISBN>/', views.addcount, name='addcount'),

@@ -31,7 +31,7 @@ def home(request):
     # Last 5 new arrivals (latest added books)
     new_arrivals = Book_details.objects.order_by('-id')[:5]
 
-    return render(request, "home.html", {
+    return render(request, "common/home.html", {
         "books": books,
         "placeholder": placeholder_image,
         "new_arrivals": new_arrivals,

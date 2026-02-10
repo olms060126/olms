@@ -1,0 +1,117 @@
+{% include 'librarian/lib_header.html' %}
+
+
+<!-- Wrapper -->
+<div class="max-w-7xl mx-auto px-6 py-8 space-y-8 text-white">
+
+  <!-- Header -->
+  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <h1 class="text-2xl font-semibold tracking-wide">
+      Library Books
+    </h1>
+    <div class="text-sm text-white/60">
+      Total Books: {{ total_books }}
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="relative z-50 flex items-center justify-between gap-6">
+
+    <!-- Left: Add Book -->
+    <div class="z-50">
+      <a href="{% url 'add_book' %}" class="inline-flex items-center gap-2
+             px-5 py-3 rounded-xl
+             bg-white text-black font-semibold
+             shadow hover:bg-gray-200 transition">
+        + Add Book
+      </a>
+    </div>
+
+    <!-- Right: Search -->
+    <div class="flex-1 flex justify-end z-40">
+      <form method="get" class="flex flex-col sm:flex-row gap-4">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search by ISBN or Book Name" class="px-4 py-3 rounded-xl
+               bg-white text-black
+               focus:outline-none focus:ring-2 focus:ring-black">
+        <button type="submit" class="px-6 py-3 rounded-xl
+               bg-white text-black font-semibold
+               hover:bg-gray-200 transition">
+          Search
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+
+  <!-- Results -->
+  <div class="bg-white rounded-xl shadow overflow-hidden text-black">
+
+    <!-- Table Header -->
+    <div class="grid grid-cols-8 gap-4 px-4 py-3 text-xs uppercase tracking-widest bg-gray-100">
+      <div>ISBN</div>
+      <div>Book Name</div>
+      <div>Author</div>
+      <div>Genre</div>
+      <div>Number of copies</div>
+      <div>AVailable</div>
+      <div>Language</div>
+    </div>
+
+    <!-- Table Body -->
+    <div class="divide-y">
+      {% for book in books %}
+      <div class="grid grid-cols-1 md:grid-cols-8 gap-4 px-4 py-4
+            items-center hover:bg-gray-50 transition">
+
+        <div class="font-mono text-sm break-all">
+          {{ book.ISBN }}
+        </div>
+
+        <div class="font-medium truncate">
+          {{ book.Book_name }}
+        </div>
+
+        <div class="truncate">
+          {{ book.Authors_name }}
+        </div>
+
+        <div>
+          {{ book.Genre }}
+        </div>
+
+        <div class="text-center">
+          {{ book.copies.count }}
+        </div>
+
+        <div class="text-center font-medium">
+          {{ book.available_copies }} / {{ book.total_copies }}
+        </div>
+
+        <div>
+          {{ book.Language }}
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center justify-end gap-4 text-sm whitespace-nowrap">
+          <a href="#" class="text-red-600 hover:text-red-800 transition">
+            Delete
+          </a>
+
+          <a href="#" class="text-gray-700 hover:text-black transition">
+            Owned By
+          </a>
+
+          <a href="#" class="text-blue-600 hover:text-blue-800 transition">
+            Edit
+          </a>
+        </div>
+
+      </div>
+      {% empty %}
+      <!-- Empty state -->
+      <div class="px-6 py-10 text-center text-gray-500 col-span-full">
+        No books found.
+      </div>
+      {% endfor %}
+    </div>

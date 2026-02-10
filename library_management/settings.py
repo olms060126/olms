@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'adminstrator',
     'common',
     'widget_tweaks',
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -62,7 +61,7 @@ ROOT_URLCONF = 'library_management.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['common/templates'],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

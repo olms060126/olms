@@ -1,0 +1,59 @@
+
+{% load widget_tweaks %}
+{% include 'tailwind.html' %}
+{% load static %}
+{% include 'librarian/messages.html' %}
+
+
+<body
+  class="min-h-screen flex items-center justify-center bg-cover bg-center"
+  style="background-image: url('{% static 'hero3.jpg' %}');"
+>
+
+    <div class="bg-white shadow-lg rounded-lg w-full max-w-md p-8">
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-blue-600">OLMS</h1>
+            <p class="text-sm text-gray-500">
+                ONLINE LIBRARY MANAGEMENT SYSTEM
+            </p>
+        </div>
+
+        <!-- Login Title -->
+        <h2 class="text-xl font-semibold text-center text-gray-700 mb-6">
+            Librarian Login
+        </h2>
+
+        <!-- Login Form -->
+        <form action="{% url 'lib_login' %}" method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div>
+                {{ forms.user_name.label_tag }}
+                {{ forms.user_name }}
+            </div>
+
+            <!-- Password -->
+            <div>
+                {{ forms.password.label_tag }}
+                {{ forms.password }}
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit"
+                class="w-full bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition">
+                Login
+            </button>
+        </form>
+        <span>
+            back to ..
+        </span>
+        <a href="{% url 'home' %}" class="text-xl text-blue-600 hover:text-green-500">
+            <span>home</span>
+        </a>
+
+    </div>
+
+</body>

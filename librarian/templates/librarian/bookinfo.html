@@ -1,0 +1,93 @@
+{% include 'librarian/lib_header.html' %}
+
+<div class=" bg-transparent flex items-center justify-center px-4 py-10">
+
+  <div class=" max-w-4xl bg-white text-black rounded-2xl shadow-xl p-8 ring-green-200 ring-2">
+
+    <h2 class="text-2xl font-semibold mb-6">
+      Add Book Details
+    </h2>
+
+    <form method="post" action="{% url 'add_book' %}" enctype="multipart/form-data"
+          class="space-y-6" id="bookForm">
+      {% csrf_token %}
+
+      <!-- Two-column grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        {% for field in forms %}
+          <div class="space-y-1 {% if field.name == 'description' %}md:col-span-2{% endif %}">
+            <label class="text-sm font-medium">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.errors %}
+              <p class="text-red-500 text-xs">{{ field.errors|striptags }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-4 pt-6">
+
+        <button type="submit"
+                class="relative px-6 py-3 rounded-xl
+                       bg-black text-white font-semibold
+                       hover:bg-gray-800 transition
+                       flex items-center justify-center"
+                id="submitBtn">
+          <span id="btnText">Submit</span>
+
+          <!-- Spinner -->
+          <svg id="spinner"
+               class="hidden ml-2 w-5 h-5 animate-spin text-white"
+               xmlns="http://www.w3.org/2000/svg"
+               fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10"
+                    stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+        </button>
+
+        <a href="javascript:history.back()"
+           class="px-6 py-3 rounded-xl
+                  border border-black text-black
+                  hover:bg-gray-100 transition">
+          Cancel
+        </a>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<script>
+  const coverInput = document.querySelector('input[type="file"]');
+  if (coverInput) {
+    const preview = document.createElement('img');
+    preview.className = "mt-3 w-32 h-40 object-cover rounded-lg border";
+    coverInput.parentElement.appendChild(preview);
+
+    coverInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        preview.src = URL.createObjectURL(file);
+      }
+    });
+  }
+const form = document.getElementById("bookForm");
+  const spinner = document.getElementById("spinner");
+  const btnText = document.getElementById("btnText");
+
+  form.addEventListener("submit", () => {
+    spinner.classList.remove("hidden");
+    btnText.textContent = "Submitting...";
+  });
+</script>

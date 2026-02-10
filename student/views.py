@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from common.models import Book_details, Reservation, Registration
-from common.forms import Registrationform, Reservationform, Book_detailsform
+from common.forms import Registrationform, Book_detailsform
 from datetime import date, timedelta
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
@@ -66,31 +66,6 @@ def login(request):
 
 
 
-# def reserve_book_manual(request, ISBN):
-#     if 'Roll_no' not in request.session:
-#         return redirect("student_login")
-    
-#     Roll_no = request.session.get('Roll_no')  
-#     student= Registration.objects.get(Roll_no=Roll_no) 
-#     book =Book_details.objects.get(ISBN=ISBN)
-    
-#     if request.method =="POST":
-#         form=Reservationform(request.POST)
-#         if form.is_valid():
-#             reservation= form.save(commit=False)
-#             reservation.student= student
-#             reservation.book= book
-#             reservation.save()
-#             return render(request, "reservation_success.html", {"student":student, "book": book})
-        
-#     else:
-#        form=Reservationform()
-       
-#     return render(request, "manual_reservation.html",{
-#         "form": form,
-#         "book": book,
-#         "student":student
-#     })
 
 
 

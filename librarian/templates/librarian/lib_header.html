@@ -1,0 +1,77 @@
+{% include 'tailwind.html' %}
+{% include 'librarian/messages.html' %}
+<!-- Header -->
+<nav class="bg-[#111827] sticky top-0 z-50 border-b border-white/10">
+  <div class="max-w-7xl mx-auto px-6">
+
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Brand -->
+      <div class="flex flex-col leading-tight text-[#F9FAFB]">
+        <span class="text-xl font-bold tracking-wide">
+          OLMS
+        </span>
+        <span class="text-xs text-[#9CA3AF] tracking-wider">
+          Online Library Management System
+        </span>
+      </div>
+
+      <!-- Navigation -->
+      <ul class="hidden md:flex items-center gap-8 text-[#E5E7EB] font-medium">
+
+        <li>
+          <a href="{% url 'lib_home' %}"
+             class="hover:text-white transition">
+            Home
+          </a>
+        </li>
+
+        <li>
+          <a href="{% url 'listofbooks' %}"
+             class="hover:text-white transition">
+            Books
+          </a>
+        </li>
+
+        <li>
+          <a href=""
+             class="hover:text-white transition">
+            Transactions
+          </a>
+        </li>
+
+        <li>
+          <a href=""
+             class="hover:text-white transition">
+            Fine Details
+          </a>
+        </li>
+
+        <li>
+          <a href=""
+             class="hover:text-white transition">
+            Reservations
+          </a>
+        </li>
+
+        <!-- Divider -->
+        <li class="h-6 w-px bg-white/20"></li>
+
+        <!-- Logout -->
+        <li>
+          <a href="{% url 'lib_logout' %}"
+             class="px-4 py-2 rounded-lg
+                    bg-white text-black
+                    font-semibold
+                    hover:bg-gray-200 transition">
+            Logout
+          </a>
+        </li>
+
+      </ul>
+
+    </div>
+
+  </div>
+</nav>
+
