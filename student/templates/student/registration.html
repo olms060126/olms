@@ -1,14 +1,8 @@
-{% comment %} {% include 'tailwind.html' %}
-<h1>REGISTRATION FORM</h1>
-<form method="post" action="registered">
-    {% csrf_token %}
-    {{ forms.as_p }}
-    <button type="submit">Register</button>
-</form> {% endcomment %}
-
-{% include 'tailwind.html' %}
 
 
+
+ <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+ 
 <div class="bg-white min-h-screen flex items-center justify-center p-6 text-gray-900 text-sm">
 
     <!-- MAIN FORM BOX -->
@@ -18,7 +12,7 @@
             REGISTRATION FORM
         </h1>
 
-        <form method="post" action="registered" class="space-y-6">
+        <form method="post" action="{% url 'register' %}" class="space-y-6">
             {% csrf_token %}
 
             <!-- Render each field with Tailwind styling -->
@@ -41,6 +35,7 @@
             </div>
 
         </form>
+        <a href="{% url 'home' %}">Back to home</a>
 
     </div>
 </div>

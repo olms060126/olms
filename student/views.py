@@ -1,16 +1,22 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from common.models import Book_details, Reservation, Registration
+from common.models import Book_details, Reservation, Registration,Book_details, Book_copy, Reservation
 from common.forms import Registrationform, Book_detailsform
 from datetime import date, timedelta
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.db import transaction
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
 
 def registration(request):
     forms= Registrationform()
-    return render(request, 'registration.html',{'forms':forms})
+    return render(request, 'student/registration.html',{'forms':forms})
+
+
 def register(request):
     msg = ""
     if request.method == "POST":
@@ -20,11 +26,11 @@ def register(request):
             
             request.session['Roll_no']=user.Roll_no
 
-            return redirect("registration_success")
+            return redirect("sthome")
 
         else:
             forms= Registrationform()
-            return render(request, 'registration.html',{'forms':forms, "msg":msg})
+            return render(request, 'student/registration.html',{'forms':forms, "msg":msg})
             
             
 def sthome(request):
@@ -69,51 +75,51 @@ def login(request):
 
 
 
-def reserve_book_manual(request, ISBN):
-    if 'Roll_no' not in request.session:
-        return redirect("student_login")
+@require_POST
+def ajax_reserve_book(request, book_id):
 
-    Roll_no = request.session.get('Roll_no')
-    student = Registration.objects.get(Roll_no=Roll_no)
-    book = Book_details.objects.get(ISBN=ISBN)
+    student = request.user.registration  # adjust if needed
 
-    # Check active reservations
-    active_res_count = Reservation.objects.filter(
+    try:
+        book = Book_details.objects.get(id=book_id)
+    except Book_details.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Book not found"})
+
+    
+    if Reservation.objects.filter(
         student=student,
-        status__in=["Pending", "Approved"]
-    ).count()
+        book__book=book,
+        status="PENDING"
+    ).exists():
+        return JsonResponse({"success": False, "error": "Already reserved"})
 
-    if active_res_count >= 2:
-        return render(request, "manual_reservation.html", {
-            "form": Reservationform(),
-            "book": book,
-            "student": student,
-            "limit_reached": True,   # <-- Important
-        })
+    
+    copy = Book_copy.objects.filter(
+        book=book,
+        is_available=True
+    ).first()
 
-    if request.method == "POST":
-        form = Reservationform(request.POST)
-        if form.is_valid():
-            reservation = form.save(commit=False)
-            reservation.student = student
-            reservation.book = book
-            reservation.save()
-            return render(request, "reservation_success.html", {
-                "student": student,
-                "book": book
-            })
+    if not copy:
+        return JsonResponse({"success": False, "error": "No copies available"})
 
-    else:
-        form = Reservationform()
+    with transaction.atomic():
+        Reservation.objects.create(
+            student=student,
+            book=copy,
+            status="PENDING"
+        )
 
-    return render(request, "manual_reservation.html", {
-        "form": form,
-        "book": book,
-        "student": student
+        copy.is_available = False
+        copy.save()
+
+    return JsonResponse({
+        "success": True,
+        "available_copies": book.copies.filter(is_available=True).count()
     })
 
 
-    
+
+
 def reservation_success(request):
     Roll_no=request.session.get("Roll_no")
     student=Registration.objects.get(Roll_no=Roll_no)

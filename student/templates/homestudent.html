@@ -1,18 +1,230 @@
-<!DOCTYPE html>
-
 {% include 'stdfeature.html' %}
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>home</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="">
-    </head>
-    <body>
-       <h1>HOME TEST PAGE</h1>
-        
-        <script src="" async defer></script>
-    </body>
-</html>
+
+<div class="min-h-screen bg-black text-white px-6 py-10 space-y-12">
+
+    <!-- Welcome -->
+    <div>
+        <h1 class="text-3xl font-semibold">Welcome, {{ student.Name }}</h1>
+        <p class="text-gray-400 text-sm mt-1">
+            Explore books by genre and manage your activity
+        </p>
+    </div>
+
+    <!--  GENRE SECTIONS-->
+
+    {% for genre, books in books_by_genre.items %}
+
+    <div class="space-y-6">
+
+        <!-- Genre Header -->
+        <div class="flex justify-between items-center">
+            <h2 class="text-2xl font-semibold tracking-wide">
+                {{ genre }}
+            </h2>
+
+            <a href="{% url 'genre_books' genre %}" class="text-sm text-gray-400 hover:text-white transition">
+                Show All →
+            </a>
+        </div>
+
+        <!-- Horizontal Scroll Cards -->
+        <div class="flex gap-6 overflow-x-auto pb-4">
+
+            {% for book in books %}
+            <div class="min-w-[200px] bg-white text-black rounded-xl shadow-lg overflow-hidden">
+
+                <!-- Cover -->
+                <div class="h-60 bg-gray-200">
+                    <img src="{{ book.cover.url }}" class="w-full h-full object-cover">
+                </div>
+
+                <!-- Info -->
+                <div class="p-4 space-y-2">
+
+                    <h3 class="font-semibold truncate">
+                        {{ book.Book_name }}
+                    </h3>
+
+                    <p class="text-xs text-gray-500 truncate">
+                        {{ book.Authors_name }}
+                    </p>
+
+                    <!-- Availability -->
+                    {% if book.available_copies > 0 %}
+                    <span class="text-green-600 text-xs font-medium">
+                        Available ({{ book.available_copies }})
+                    </span>
+                    {% else %}
+                    <span id="availability-{{ book.id }}" class="text-green-600 text-xs font-medium">
+                        Available ({{ book.available_copies }})
+                    </span>
+
+                    {% endif %}
+
+                    <!-- Reservation Button -->
+                    <div class="pt-2">
+                        {% if book.is_reserved %}
+                        <button
+                            class="w-full py-2 rounded-lg bg-gray-300 text-gray-600 text-sm font-semibold cursor-not-allowed">
+                            Already Reserved
+                        </button>
+                        {% else %}
+                        <button class="reserve-btn w-full py-2 rounded-lg
+         bg-black text-white text-sm font-semibold
+         hover:bg-gray-800 transition" data-book-id="{{ book.id }}">
+                            Reserve
+                        </button>
+
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    {% endfor %}
+
+    <!--  POSSESSION  -->
+
+    <div class="space-y-4">
+        <h2 class="text-2xl font-semibold">Books in Your Possession</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for txn in student_transactions %}
+            <div class="bg-white text-black rounded-xl p-4 shadow space-y-2">
+                <h3 class="font-semibold">
+                    {{ txn.Access_no.book.Book_name }}
+                </h3>
+
+                <p class="text-sm text-gray-500">
+                    Due: {{ txn.due_date }}
+                </p>
+
+                {% if txn.status == "NOT_RETURNED" %}
+                <span class="text-red-600 text-sm font-medium">
+                    Not Returned
+                </span>
+                {% else %}
+                <span class="text-green-600 text-sm font-medium">
+                    Returned
+                </span>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-gray-400">No books currently issued.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!--  ACTIVITY SUMMARY  -->
+
+    <div class="space-y-6">
+
+        <h2 class="text-2xl font-semibold">Your Activity</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
+                <p class="text-sm text-gray-500">Total Reserved</p>
+                <p class="text-2xl font-bold mt-2">
+                    {{ total_reserved }}
+                </p>
+            </div>
+
+            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
+                <p class="text-sm text-gray-500">Books Issued</p>
+                <p class="text-2xl font-bold mt-2">
+                    {{ total_issued }}
+                </p>
+            </div>
+
+            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
+                <p class="text-sm text-gray-500">Fines Paid</p>
+                <p class="text-2xl font-bold mt-2">
+                    ₹ {{ total_fine_paid }}
+                </p>
+            </div>
+
+            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
+                <p class="text-sm text-gray-500">Pending Fines</p>
+                <p class="text-2xl font-bold mt-2 text-red-600">
+                    ₹ {{ pending_fines }}
+                </p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+document.querySelectorAll(".reserve-btn").forEach(button => {
+
+  button.addEventListener("click", function () {
+
+    const bookId = this.dataset.bookId;
+    const btn = this;
+    const availability = document.getElementById(`availability-${bookId}`);
+
+    btn.disabled = true;
+    btn.innerText = "Processing...";
+
+    fetch(`/ajax/reserve/${bookId}/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+        "Content-Type": "application/json"
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+
+      if (data.success) {
+        btn.innerText = "Already Reserved";
+        btn.classList.remove("bg-black");
+        btn.classList.add("bg-gray-400");
+        btn.disabled = true;
+
+        availability.innerText =
+          `Available (${data.available_copies})`;
+
+      } else {
+        btn.innerText = data.error;
+        setTimeout(() => {
+          btn.innerText = "Reserve";
+          btn.disabled = false;
+        }, 2000);
+      }
+
+    })
+    .catch(() => {
+      btn.innerText = "Error";
+      btn.disabled = false;
+    });
+
+  });
+
+});
+</script>

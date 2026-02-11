@@ -1,16 +1,4 @@
-{% comment %} {% include 'tailwind.html' %}
-<div>
-    <ul>
-    
-        <li><a href ="{% url 'book_list' %}"> BOOKS</a></li>
-        <li><a href ="{% url 'register' %}"> REGISTER</a></li>
-        <li><a href ="{% url 'sthome' %}"> HOME</a></li>
-        <li><a href ="{% url 'login' %}"> LOGIN</a></li>
-        <li><a href ="{% url 'myreservations' %}"> MY RESERVATION</a></li>
-        </ul>
-</div> 
- {% endcomment %}
-{% include 'tailwind.html' %}
+
 
 <!-- NAVIGATION BAR -->
 <nav class="bg-[#111827] shadow-md">
@@ -50,12 +38,6 @@
     </div>
 </nav>
 
-<!-- MAIN CONTENT BLOCK -->
-<div id="main-content" class="max-w-7xl mx-auto mt-8 px-4">
-    {% block content %}
-    <!-- Page-specific content will go here -->
-    {% endblock %}
-</div>
 
 
 

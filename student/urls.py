@@ -6,7 +6,7 @@ urlpatterns = [
     path('register', views.registration, name='register'), 
     path('student/login', views.login, name='student_login'),
     path('book_list', views.book_list, name='book_list'),
-    path("reserve/<str:ISBN>", views.reserve_book_manual, name="reserve_book_manual"),
+    path("reserve/<int:book_id>", views.ajax_reserve_book, name="ajax_reserve_book"),
     path("myreservations", views.my_reservations, name="myreservations"),
     
     # action
