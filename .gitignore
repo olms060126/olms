@@ -1,0 +1,13 @@
+.env
+.env.*
+*.env
+
+venv/
+
+common/__pycache__/
+librarian/__pycache__/
+student/__pycache__/
+media/
+
+db.sqlite3
+
