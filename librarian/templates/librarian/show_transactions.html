@@ -148,7 +148,61 @@
 </div>
 
 
+<!--Fine payments confirmation  model-->
+
+<!-- Fine Modal -->
+<div id="fineModal"
+     class="fixed inset-0 bg-black bg-opacity-50 hidden
+            flex items-center justify-center z-50">
+
+    <div class="bg-white text-black p-8 rounded-2xl shadow-xl w-96">
+
+        <h2 class="text-xl font-semibold mb-4">
+            Overdue Fine
+        </h2>
+
+        <p class="mb-6">
+            Fine Amount:
+            <p id="fineMessage" class="mb-6"></p>
+
+        </p>
+
+        <div class="flex justify-end gap-4">
+            <button onclick="closeModal()"
+                    class="px-4 py-2 border rounded-lg">
+                Close
+            </button>
+
+            <button id="payFineBtn"
+                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Pay Now
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+
 <script>
+
+    
+function payFine(id) {
+
+    fetch(`/librarian/librarian/pay-fine/${id}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            closeModal();
+            window.location.reload();   
+        }
+    });
+}
     function getCookie(name) {
         let cookieValue = null;
 
@@ -171,6 +225,17 @@
     }
 
 
+const message = document.getElementById("fineMessage");
+
+if (fine > 0) {
+    message.innerHTML =
+        `Fine Amount: <span class="font-bold text-red-600">₹ ${fine}</span>`;
+} else {
+    message.innerHTML =
+        `<span class="text-green-600 font-semibold">
+            No fine. Book returned successfully.
+         </span>`;
+}
 
 
 
@@ -189,20 +254,51 @@
             });
     }
 
-    function markReturned(id) {
-        fetch(`/librarian/librarian/return/${id}/`, {
-            method: "POST",
-            headers: {
-                "X-CSRFToken": getCookie("csrftoken"),
+function markReturned(id) {
+
+    fetch(`/librarian/librarian/return/${id}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie("csrftoken"),
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.success) {
+            window.location.reload();
+
+            const fine = data.fine_amount || 0;
+
+            document.getElementById("fineAmount").innerText =
+                "₹ " + fine;
+
+            const payBtn = document.getElementById("payFineBtn");
+
+            if (fine > 0) {
+                payBtn.style.display = "inline-block";
+                payBtn.onclick = function() {
+                    payFine(data.transaction_id);
+                };
+            } else {
+                payBtn.style.display = "none";
             }
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    window.location.reload();
-                }
-            });
-    }
+
+            document.getElementById("fineModal")
+                    .classList.remove("hidden");
+        }
+
+    });
+}
+
+
+
+function closeModal() {
+    document.getElementById("fineModal")
+            .classList.add("hidden");
+}
+
+
 
 
 </script>

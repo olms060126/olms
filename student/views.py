@@ -46,8 +46,23 @@ def register(request):
         form = Registrationform()
 
     return render(request, "student/registration.html", {"forms": form})
-         
-            
+
+
+#js call to cancel reservation
+def cancel_reservation(request, res_id):
+
+    reservation = get_object_or_404(Reservation, id=res_id)
+
+    if reservation.status in ["COLLECTED", "EXPIRED"]:
+        return JsonResponse({
+            "success": False,
+            "message": "Cannot cancel this reservation"
+        })
+
+    reservation.status = "CANCELLED"
+    reservation.save()
+
+    return JsonResponse({"success": True})   
 
 
 
@@ -90,10 +105,14 @@ def sthome(request):
     # STUDENT TRANSACTIONS
     
 
+   
+
     student_transactions = (
         Transaction_table.objects
         .filter(Owned_by=student)
         .select_related("Access_no__book")
+        .prefetch_related("finetable")
+        .order_by("-issued_on")
     )
 
     
@@ -105,12 +124,22 @@ def sthome(request):
         student=student
     ).count()
 
-    total_issued = student_transactions.count()
+    total_issued = student_transactions.filter(
+        returned=False
+    ).count()
 
-    fine_data = Fine_table.objects.all()
-    total_fine_paid = fine_data.aggregate(
-        total=Sum("amount_payable")
-    )["total"] or 0
+    student_fines = Fine_table.objects.filter(
+        transaction__Owned_by=student
+    )
+
+    total_fine_paid = student_fines.filter(
+        paid=True
+    ).aggregate(total=Sum("amount_payable"))["total"] or 0
+
+    pending_fines = student_fines.filter(
+        paid=False
+    ).aggregate(total=Sum("amount_payable"))["total"] or 0
+    
 
     # You can refine this if you add a "paid" field later
     pending_fines = total_fine_paid  

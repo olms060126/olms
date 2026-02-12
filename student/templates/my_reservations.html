@@ -6,37 +6,31 @@
         border-radius: 999px;
         font-size: 12px;
         font-weight: 600;
-        transition: all 0.3s ease;
     }
 
     .pending {
         background: #fef3c7;
         color: #b45309;
-        animation: pulse 1.5s infinite;
     }
 
-    .approved {
+    .allocated {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .collected {
         background: #d1fae5;
         color: #065f46;
     }
 
-    .rejected {
+    .expired {
         background: #fee2e2;
         color: #991b1b;
     }
 
-    @keyframes pulse {
-        0% {
-            box-shadow: 0 0 0 0 rgba(180, 83, 9, 0.4);
-        }
-
-        70% {
-            box-shadow: 0 0 0 6px rgba(180, 83, 9, 0);
-        }
-
-        100% {
-            box-shadow: 0 0 0 0 rgba(180, 83, 9, 0);
-        }
+    .cancelled {
+        background: #e5e7eb;
+        color: #374151;
     }
 </style>
 
@@ -94,6 +88,9 @@
                         <th class="px-6 py-4 cursor-pointer" onclick="sortTable(2, this)">
                             Status <span class="sort-arrow"></span>
                         </th>
+                        <th class="px-6 py-4 cursor-pointer">
+                            <span class="sort-arrow"></span>
+                        </th>
                     </tr>
                 </thead>
 
@@ -107,14 +104,45 @@
                             {{ rr.reserved_at|date:"Y-m-d H:i" }}
                         </td>
                         <td class="px-6 py-4" data-status="{{ rr.status }}">
+                            
                             {% if rr.status == "PENDING" %}
                             <span class="badge pending">Pending</span>
-                            {% elif rr.status == "APPROVED" %}
-                            <span class="badge approved">Approved</span>
-                            {% else %}
-                            <span class="badge rejected">Not Approved</span>
+
+                            {% elif rr.status == "ALLOCATED" %}
+                            <span class="badge allocated">Allocated</span>
+
+                            {% elif rr.status == "COLLECTED" %}
+                            <span class="badge collected">Collected</span>
+
+                            {% elif rr.status == "EXPIRED" %}
+                            <span class="badge expired">Expired</span>
+
+                            {% elif rr.status == "CANCELLED" %}
+                            <span class="badge cancelled">Cancelled</span>
+
                             {% endif %}
+
                         </td>
+                        <td class="px-6 py-4">
+                            {% if rr.status == "PENDING" or rr.status == "ALLOCATED" %}
+                            <button class="group px-4 py-2 text-sm font-semibold
+                 rounded-xl
+           bg-gradient-to-r from-red-500 to-red-600
+           text-white
+           shadow-md
+           hover:shadow-lg
+           hover:scale-105
+           transition-all duration-200" data-url="{% url 'cancel_reservartion' rr.id %}"
+                                onclick="cancelReservation(this)">
+                                Cancel
+                            </button>
+
+                            {% else %}
+                            <span class="text-reg-500">canceled</span>
+                        </td>
+                        {% endif %}
+
+
 
 
                     </tr>
@@ -155,6 +183,50 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+
+    function getCookie(name) {
+        let cookieValue = null;
+
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+
+                if (cookie.startsWith(name + '=')) {
+                    cookieValue = decodeURIComponent(
+                        cookie.substring(name.length + 1)
+                    );
+                    break;
+                }
+            }
+        }
+
+        return cookieValue;
+    }
+
+
+    function cancelReservation(button) {
+        if (!confirm("Are you sure you want to cancel this reservation?")) {
+        return;
+    }
+
+        const url = button.dataset.url;
+
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken"),
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            });
+    }
+
     let sortDirection = {};
 
     function sortTable(columnIndex, header) {
@@ -223,20 +295,33 @@
     /* Reservation Statistics Chart */
     const statusCounts = {
         PENDING: 0,
-        APPROVED: 0,
-        NOT_APPROVED: 0
+        ALLOCATED: 0,
+        COLLECTED: 0,
+        EXPIRED: 0,
+        CANCELLED: 0,
+        COMPLETED:0,
     };
 
+    const colermap = {
+        PENDING: "#f59e0b",
+        ALLOCATED: "#3b82f6",
+        COLLECTED: "#10b981",
+        EXPIRED: "#ef4444",
+        CANCELLED: "#6b7280",
+        COMPLETED:"#22c55e",
+    };
     document.querySelectorAll("#reservationTable tbody tr").forEach(row => {
-        const statusCell = row.children[2];
+
+        const statusCell = row.querySelector("[data-status]");
         if (!statusCell) return;
 
-        const status = statusCell.dataset.status;  // ← key change
+        const status = statusCell.dataset.status;
 
         if (statusCounts.hasOwnProperty(status)) {
             statusCounts[status]++;
         }
     });
+
 
     new Chart(document.getElementById("reservationChart"), {
         type: "pie",
@@ -244,14 +329,15 @@
             labels: Object.keys(statusCounts),
             datasets: [{
                 data: Object.values(statusCounts),
-                borderWidth: 0
+                borderWidth: 0,
+                backgroundColor: colors = Object.keys(statusCounts).map(status => colermap[status])
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { position: "bottom" }
+                legend: { position: "right" }
             }
         }
     });

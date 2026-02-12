@@ -13,6 +13,7 @@ urlpatterns = [
     path('registered', views.register, name='registered'),
     path('resevation_success',views.reservation_success, name="reservation_success"),
     path('registration_success',views.registration_success, name="registration_success"),
+    path('student/cancel_reservation/<int:res_id>',views.cancel_reservation, name="cancel_reservartion"),
 
 ]
 

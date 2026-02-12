@@ -71,6 +71,8 @@ def expire_uncollected():
         allocated_at__lt=expiry_time
     )
 
+    
+
     for res in expired_reservations:
         res.status = 'EXPIRED'
         res.book.is_available = True

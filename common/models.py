@@ -81,12 +81,15 @@ class Book_copy(models.Model):
 class Reservation(models.Model):
 
     STATUS_CHOICES = [
-        ('PENDING', 'Pending'),
-        ('ALLOCATED', 'Allocated'),
-        ('COLLECTED', 'Collected'),
-        ('EXPIRED', 'Expired'),
-        ('CANCELLED', 'Cancelled'),
-    ]
+    ('PENDING', 'Pending'),
+    ('ALLOCATED', 'Allocated'),
+    ('COLLECTED', 'Collected'),
+    ('COMPLETED', 'Completed'),
+    ('EXPIRED', 'Expired'),
+    ('CANCELLED', 'Cancelled'),
+]
+
+
 
     student = models.ForeignKey(Registration, on_delete=models.CASCADE)
 
@@ -173,6 +176,9 @@ class Fine_table(models.Model):
     )
     amount_payable = models.PositiveIntegerField()
     paid = models.BooleanField(default=False)
+
+
+
 
 
 

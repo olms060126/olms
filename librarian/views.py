@@ -12,6 +12,7 @@ from django.views.decorators.http import require_POST
 from common.util import send_mail
 from django.db.models import Sum, Count
 from django.db.models.functions import TruncMonth
+from datetime import date
 
 
 from common.service import expire_uncollected,allocate_books,send_due_reminders,calculate_fines
@@ -97,34 +98,69 @@ def lib_home(request):
     return render(request, "librarian/libhome.html", context)
 
 
+FINE_PER_DAY = 10
 @require_POST
 def mark_returned(request, txn_id):
-    
+    print(f"Marking transaction {txn_id} as returned")
+    txn = get_object_or_404(Transaction_table, id=txn_id)
 
-    txn = Transaction_table.objects.get(id=txn_id)
-    # getting student for email from txn
-    student = txn.Owned_by
-    email  = student.email
-    print(email)
+    if txn.returned:
+        return JsonResponse({
+            "success": False,
+            "message": "Already returned"
+        })
+
+    today = date.today()
 
     txn.returned = True
     txn.Access_no.is_available = True
     txn.Access_no.save()
     txn.save()
-    subject = "Book Returned Confirmation"
-    message = f""" Dear {{student.Name}},\n\n
-        thank you for returning the book
-        '{txn.Access_no.book.Book_name}' (ISBN: {txn.Access_no.book.ISBN}) \
-            on {txn.issued_on.strftime('%Y-%m-%d %H:%M:%S')}."""
-        
-    send_mail(
-            reseiver=email, 
-            subject = subject ,
-            body= message)
+
+    fine_amount = 0
+
+    if today > txn.Due_date:
+        overdue_days = (today - txn.Due_date).days
+        fine_amount = overdue_days * FINE_PER_DAY
+
+        Fine_table.objects.update_or_create(
+            transaction=txn,
+            defaults={
+                "amount_payable": fine_amount,
+                "paid": False
+            }
+        )
+    reservation = Reservation.objects.filter(
+        student=txn.Owned_by,
+        book=txn.Access_no,
+        status="COLLECTED"
+    ).first()
+
+    if reservation:
+        reservation.status = "COMPLETED"
+        reservation.save()
+
+
+    return JsonResponse({
+        "success": True,
+        "fine_amount": fine_amount,
+        "transaction_id": txn.id
+    })
+#Allocation of books
+
+
+def pay_fine(request, txn_id):
+
+    txn = get_object_or_404(Transaction_table, id=txn_id)
+    fine = get_object_or_404(Fine_table, transaction=txn)
+
+    fine.paid = True
+    fine.save()
 
     return JsonResponse({"success": True})
 
-#Allocation of books
+
+
 @require_POST
 def mark_collected(request, txn_id):
     
@@ -138,6 +174,14 @@ def mark_collected(request, txn_id):
 
         txn.collected = True
         txn.save()
+        reservation = Reservation.objects.filter(
+        student=txn.Owned_by,
+        book=txn.Access_no,
+        status="ALLOCATED"
+    ).first()
+        if reservation:
+            reservation.status = "COLLECTED"
+            reservation.save()
         subject = "Book Collection Confirmation"
         message = f""" Dear {{student.Name}},\n\n
         you have successfully collected the book

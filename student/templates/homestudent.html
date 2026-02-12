@@ -63,9 +63,9 @@
                 {{ genre }}
             </h2>
 
-            <a href="" class="text-sm text-gray-400 hover:text-black transition">
+            <!-- <a href="" class="text-sm text-gray-400 hover:text-black transition">
                 Show All →
-            </a>
+            </a> -->
         </div>
 
         <!-- Horizontal Scroll Cards -->
@@ -133,35 +133,118 @@
 
     <!--  POSSESSION  -->
 
-    <div class="space-y-4">
-        <h2 class="text-2xl font-semibold">Books in Your Possession</h2>
+    <div class="space-y-6">
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <h2 class="text-2xl font-semibold">
+        Books in Your Possession
+    </h2>
+
+    {% if student_transactions %}
+
+    <div class="relative">
+
+        <!-- Scroll Buttons -->
+        <button onclick="scrollLeft()"
+                class="absolute left-0 top-1/2 -translate-y-1/2
+                       bg-black text-white p-2 rounded-full z-10">
+            ←
+        </button>
+
+        <button onclick="scrollRight()"
+                class="absolute right-0 top-1/2 -translate-y-1/2
+                       bg-black text-white p-2 rounded-full z-10">
+            →
+        </button>
+
+        <!-- Carousel Container -->
+        <div id="bookCarousel"
+             class="flex gap-6 overflow-x-auto scroll-smooth
+                    snap-x snap-mandatory
+                    pb-4">
+
             {% for txn in student_transactions %}
-            <div class="bg-white text-black rounded-xl p-4 shadow space-y-2">
-                <h3 class="font-semibold">
+            <div class="min-w-[280px] snap-start
+                        bg-white text-black rounded-2xl
+                        shadow-lg hover:shadow-xl
+                        transition p-4 space-y-3">
+
+                <!-- Book Cover -->
+                <div class="h-40 w-full overflow-hidden rounded-xl">
+                    <img src="{{ txn.Access_no.book.cover.url }}"
+                         class="h-full w-full object-cover"
+                         alt="Book Cover">
+                </div>
+
+                <!-- Book Info -->
+                <h3 class="font-semibold text-lg">
                     {{ txn.Access_no.book.Book_name }}
                 </h3>
 
                 <p class="text-sm text-gray-500">
-                    Due: {{ txn.due_date }}
+                    {{ txn.Access_no.book.Authors_name }}
                 </p>
 
-                {% if txn.status == "NOT_RETURNED" %}
-                <span class="text-red-600 text-sm font-medium">
-                    Not Returned
-                </span>
-                {% else %}
-                <span class="text-green-600 text-sm font-medium">
-                    Returned
-                </span>
-                {% endif %}
+                <div class="text-sm space-y-1">
+
+                    <p>
+                        Issued:
+                        <span class="font-medium">
+                            {{ txn.issued_on|date:"M d, Y" }}
+                        </span>
+                    </p>
+
+                    <p>
+                        Due:
+                        <span class="font-medium">
+                            {{ txn.Due_date|date:"M d, Y" }}
+                        </span>
+                    </p>
+
+                    <p>
+                        Fine:
+                        {% if txn.fine_table and not txn.fine_table.paid %}
+                            <span class="text-red-600 font-semibold">
+                                ₹ {{ txn.fine_table.amount_payable }}
+                            </span>
+                        {% else %}
+                            <span class="text-green-600 font-medium">
+                                ₹ 0
+                            </span>
+                        {% endif %}
+                    </p>
+
+                </div>
+
+                <!-- Status -->
+                <div>
+                    {% if txn.returned %}
+                        <span class="px-3 py-1 text-xs rounded-full
+                                     bg-green-100 text-green-700">
+                            Returned
+                        </span>
+                    {% else %}
+                        <span class="px-3 py-1 text-xs rounded-full
+                                     bg-red-100 text-red-700">
+                            Active
+                        </span>
+                    {% endif %}
+                </div>
+
             </div>
-            {% empty %}
-            <p class="text-gray-400">No books currently issued.</p>
             {% endfor %}
+
         </div>
+
     </div>
+
+    {% else %}
+        <p class="text-gray-400">
+            No books currently issued.
+        </p>
+    {% endif %}
+
+</div>
+
 
 
 </div>
@@ -182,7 +265,15 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+function scrollLeft() {
+    document.getElementById("bookCarousel")
+        .scrollBy({ left: -320, behavior: "smooth" });
+}
 
+function scrollRight() {
+    document.getElementById("bookCarousel")
+        .scrollBy({ left: 320, behavior: "smooth" });
+}
 
 document.querySelectorAll(".reserve-btn").forEach(button => {
 
