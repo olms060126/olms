@@ -33,8 +33,10 @@
                     {{ value }}
                 </p>
             </div>
-            {% endfor %}
+           
+            {%  empty %}
             <p> no static to show</p>
+             {% endfor %}
         </section>
 
 

@@ -24,7 +24,7 @@ class LoginForm(forms.ModelForm):
 class Registrationform(forms.ModelForm):
     class Meta:
         model = Registration
-        fields = ['Roll_no', 'User_name', 'Password', 'Name', 'Phn_no', 'Batch']
+        fields = ['Roll_no', 'User_name', 'Password', 'Name', 'Phn_no', 'Batch','email']
 
         widgets = {
             'Roll_no': forms.TextInput(attrs={
@@ -36,6 +36,7 @@ class Registrationform(forms.ModelForm):
             'Name': forms.TextInput(attrs=text_style),
             'Phn_no': forms.NumberInput(attrs=text_style),
             'Batch': forms.TextInput(attrs=text_style),
+            'email': forms.EmailInput(attrs=text_style),
         }
 
 

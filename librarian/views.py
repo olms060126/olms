@@ -8,6 +8,7 @@ from django.db import transaction
 from django.db.models import F
 from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date
+from django.views.decorators.http import require_POST
 
 from common.service import expire_uncollected,allocate_books
 
@@ -33,36 +34,100 @@ def lib_login(request):
 
 #home page of librarian
 def lib_home(request):
+
+    # --------------------------
+    # Core Counts
+    # --------------------------
+
+    total_books = Book_details.objects.count()
+    total_copies = Book_copy.objects.count()
+
+    available_copies = Book_copy.objects.filter(
+        is_available=True
+    ).count()
+
+    # Active issued books = collected but not returned
+    issued_books = Transaction_table.objects.filter(
+        collected=True,
+        returned=False
+    ).count()
+
+    # Allocated but not yet collected
+    pending_collection = Transaction_table.objects.filter(
+        collected=False,
+        returned=False
+    ).count()
+
+    total_students = Registration.objects.count()
+
+    pending_reservations = Reservation.objects.filter(
+        status="PENDING"
+    ).count()
+
+    allocated_reservations = Reservation.objects.filter(
+        status="ALLOCATED"
+    ).count()
+
+    # --------------------------
+    # Dashboard Stats Cards
+    # --------------------------
+
     stats = [
-        ("Books", Book_details.objects.count()),
-        ("Copies", Book_copy.objects.count()),
-        ("Available", Book_copy.objects.filter(is_available=True).count()),
-        ("Issued", Transaction_table.objects.filter(status="NOT_RETURNED").count()),
-        ("Students", Registration.objects.count()),
-        ("Pending", Reservation.objects.filter(status="PENDING").count()),
+        ("Books", total_books),
+        ("Copies", total_copies),
+        ("Available", available_copies),
+        ("Issued", issued_books),
+        ("Pending Collection", pending_collection),
+        ("Students", total_students),
+        ("Pending Reservations", pending_reservations),
+        ("Allocated Reservations", allocated_reservations),
     ]
 
     context = {
         "stats": stats,
-        "available_copies": Book_copy.objects.filter(is_available=True).count(),
-        "issued_books": Transaction_table.objects.filter(status="NOT_RETURNED").count(),
-        "total_books": Book_details.objects.count(),
-        "total_copies": Book_copy.objects.count(),
-        "total_students": Registration.objects.count(),
-        "pending_reservations": Reservation.objects.filter(status="PENDING").count(),
+        "available_copies": available_copies,
+        "issued_books": issued_books,
+        "pending_collection": pending_collection,
+        "total_books": total_books,
+        "total_copies": total_copies,
+        "total_students": total_students,
+        "pending_reservations": pending_reservations,
+        "allocated_reservations": allocated_reservations,
     }
-    return render(request,'librarian/libhome.html',context)
+
+    return render(request, "librarian/libhome.html", context)
 
 
-
-#Allocation of books
-def mark_collected(request, txn_id):
+@require_POST
+def mark_returned(request, txn_id):
 
     txn = Transaction_table.objects.get(id=txn_id)
-    txn.collected = True
+
+    txn.returned = True
+    txn.Access_no.is_available = True
+    txn.Access_no.save()
     txn.save()
 
     return JsonResponse({"success": True})
+
+#Allocation of books
+@require_POST
+def mark_collected(request, txn_id):
+
+    try:
+        txn = Transaction_table.objects.get(id=txn_id)
+
+        if txn.returned:
+            return JsonResponse({"success": False, "error": "Already returned"})
+
+        txn.collected = True
+        txn.save()
+
+        return JsonResponse({"success": True})
+
+    except Transaction_table.DoesNotExist:
+        return JsonResponse({"success": False}, status=404)
+    
 
 
 #buisiness logic for circulation service

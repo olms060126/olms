@@ -27,5 +27,10 @@ urlpatterns = [
 
     #circulation service 
     path("circulation_service/", views.circulation_service, name="circulation_service"),
+    path("librarian/collect/<int:txn_id>/",views.mark_collected,name="mark_collected"),
+    path("librarian/collect/<int:txn_id>/", views.mark_collected, name="mark_collected"),
+    path("librarian/return/<int:txn_id>/", views.mark_returned, name="mark_returned"),
+
+
     
 ]

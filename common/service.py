@@ -2,6 +2,7 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db import transaction
 from .models import Transaction_table,Book_copy,Reservation
+from .util import send_mail
 
 
 def allocate_books():
@@ -36,6 +37,16 @@ def allocate_books():
                 res.status = 'ALLOCATED'
                 res.allocated_at = timezone.now()
                 res.save()
+                #send notifiation to students about allocation
+                student_email = res.student.email
+                book_title = res.book.book.Book_name
+                send_mail(
+                    subject="Book Allocation Notification",
+                    body=f"""Dear {res.student.Name},\n\nThe book '{book_title}' has been allocated to you
+                    . Please collect it within 3 days.\n\nThank you. Or your book reservation will be expired after 3 days.""",
+                    reseiver=student_email,
+                )
+
 
                 Transaction_table.objects.create(
                     Access_no=copy,

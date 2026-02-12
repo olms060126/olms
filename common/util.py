@@ -1,3 +1,6 @@
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 from django.conf import settings
 from phonepe.sdk.pg.payments.v2.standard_checkout_client import StandardCheckoutClient
 from phonepe.sdk.pg.payments.v2.models.request.standard_checkout_pay_request import StandardCheckoutPayRequest
