@@ -9,6 +9,8 @@ from django.db.models import F
 from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
+from common.util import send_mail
+
 
 from common.service import expire_uncollected,allocate_books
 
@@ -35,9 +37,6 @@ def lib_login(request):
 #home page of librarian
 def lib_home(request):
 
-    # --------------------------
-    # Core Counts
-    # --------------------------
 
     total_books = Book_details.objects.count()
     total_copies = Book_copy.objects.count()
@@ -68,9 +67,7 @@ def lib_home(request):
         status="ALLOCATED"
     ).count()
 
-    # --------------------------
-    # Dashboard Stats Cards
-    # --------------------------
+  
 
     stats = [
         ("Books", total_books),
@@ -100,28 +97,54 @@ def lib_home(request):
 
 @require_POST
 def mark_returned(request, txn_id):
+    
 
     txn = Transaction_table.objects.get(id=txn_id)
+    # getting student for email from txn
+    student = txn.Owned_by
+    email  = student.email
+    print(email)
 
     txn.returned = True
     txn.Access_no.is_available = True
     txn.Access_no.save()
     txn.save()
+    subject = "Book Returned Confirmation"
+    message = f""" Dear {{student.Name}},\n\n
+        thank you for returning the book
+        '{txn.Access_no.book.Book_name}' (ISBN: {txn.Access_no.book.ISBN}) \
+            on {txn.issued_on.strftime('%Y-%m-%d %H:%M:%S')}."""
+        
+    send_mail(
+            reseiver=email, 
+            subject = subject ,
+            body= message)
 
     return JsonResponse({"success": True})
 
 #Allocation of books
 @require_POST
 def mark_collected(request, txn_id):
-
+    
     try:
         txn = Transaction_table.objects.get(id=txn_id)
+        student = txn.Owned_by
+        print(student.email)
 
         if txn.returned:
             return JsonResponse({"success": False, "error": "Already returned"})
 
         txn.collected = True
         txn.save()
+        subject = "Book Collection Confirmation"
+        message = f""" Dear {{student.Name}},\n\n
+        you have successfully collected the book
+        '{txn.Access_no.book.Book_name}' (ISBN: {txn.Access_no.book.ISBN}) on {txn.issued_on.strftime('%Y-%m-%d %H:%M:%S')}.
+        Please return the book within 14 days to avoid late fees.\n\n"""
+        send_mail(
+            reseiver=student.email, 
+            subject = subject ,
+            body= message)
 
         return JsonResponse({"success": True})
 
