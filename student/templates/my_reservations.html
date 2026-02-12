@@ -1,64 +1,279 @@
-{% comment %} {% include 'stdfeature.html' %}
-<h1>My Reservations</h1>
-
-<table border="1">
-    <tr>
-        <th>Book</th>
-        <th>Reserved Time</th>
-        <th>Status</th>
-    </tr>
-
-    {% for rr in resd %}
-    <tr>
-        <td>{{ rr.book }}</td>
-        <td>{{ rr.reserved_at }}</td>
-        <td>{{ rr.status }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="3">You have no reservations</td>
-    </tr>
-    {% endfor %}
-</table> {% endcomment %}
-
 {% include 'stdfeature.html' %}
-
-<h1>My Reservations</h1>
-
 <style>
-    table {
-        border-collapse: collapse;
-        width: 70%;
-        margin-top: 20px;
+    .badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
     }
 
-    th, td {
-        border: 1px solid #000;
-        padding: 10px 15px;   /* SPACE between text and borders */
-        text-align: left;
+    .pending {
+        background: #fef3c7;
+        color: #b45309;
+        animation: pulse 1.5s infinite;
     }
 
-    th {
-        background-color: #f2f2f2;
+    .approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .rejected {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(180, 83, 9, 0.4);
+        }
+
+        70% {
+            box-shadow: 0 0 0 6px rgba(180, 83, 9, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(180, 83, 9, 0);
+        }
     }
 </style>
 
-<table>
-    <tr>
-        <th>Book</th>
-        <th>Reserved Time</th>
-        <th>Status</th>
-    </tr>
+<div class="min-h-screen bg-black text-white px-6 py-10 space-y-10">
 
-    {% for rr in resd %}
-    <tr>
-        <td>{{ rr.book }}</td>
-        <td>{{ rr.reserved_at }}</td>
-        <td>{{ rr.status }}</td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="3">You have no reservations</td>
-    </tr>
-    {% endfor %}
-</table>
+    <h1 class="text-3xl font-semibold">My Reservations</h1>
+
+    <!--  
+ FILTER BAR  
+ -->
+    <div class="bg-white text-black rounded-xl p-6 shadow space-y-4">
+
+        <div class="flex flex-col md:flex-row md:items-center gap-4">
+
+            <!-- Live Search -->
+            <input type="text" id="searchInput" placeholder="Search by book name..."
+                class="flex-1 px-4 py-2 rounded-lg border focus:ring-2 focus:ring-black">
+
+            <!-- Date Range -->
+            <input type="date" id="startDate" class="px-3 py-2 rounded-lg border">
+            <input type="date" id="endDate" class="px-3 py-2 rounded-lg border">
+
+            <button onclick="filterByDate()"
+                class="px-4 py-2 rounded-lg bg-black text-white hover:bg-gray-800 transition">
+                Apply
+            </button>
+
+
+            <button onclick="resetFilters()"
+                class="px-4 py-2 rounded-lg border border-black hover:bg-gray-100 transition">
+                Reset
+            </button>
+
+        </div>
+
+
+    </div>
+
+    <!--  
+ TABLE  
+ -->
+    <div class="bg-white text-black rounded-xl shadow overflow-hidden">
+
+        <div class="overflow-x-auto">
+            <table id="reservationTable" class="w-full text-sm">
+
+                <thead class="bg-gray-100 text-xs uppercase tracking-wider">
+                    <tr>
+                        <th class="px-6 py-4 cursor-pointer" onclick="sortTable(0, this)">
+                            Book <span class="sort-arrow"></span>
+                        </th>
+                        <th class="px-6 py-4 cursor-pointer" onclick="sortTable(1, this)">
+                            Reserved Time <span class="sort-arrow"></span>
+                        </th>
+                        <th class="px-6 py-4 cursor-pointer" onclick="sortTable(2, this)">
+                            Status <span class="sort-arrow"></span>
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y">
+                    {% for rr in resd %}
+                    <tr class="hover:bg-gray-50 transition duration-200">
+                        <td class="px-6 py-4 font-medium">
+                            {{ rr.book.book.Book_name }}
+                        </td>
+                        <td class="px-6 py-4">
+                            {{ rr.reserved_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td class="px-6 py-4" data-status="{{ rr.status }}">
+                            {% if rr.status == "PENDING" %}
+                            <span class="badge pending">Pending</span>
+                            {% elif rr.status == "APPROVED" %}
+                            <span class="badge approved">Approved</span>
+                            {% else %}
+                            <span class="badge rejected">Not Approved</span>
+                            {% endif %}
+                        </td>
+
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="px-6 py-8 text-center text-gray-500">
+                            You have no reservations
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+    <!--  
+ STATISTICS  
+ -->
+    <div class="bg-white text-black rounded-xl p-6 shadow">
+
+        <h2 class="text-lg font-semibold mb-4">
+            Reservation Statistics
+        </h2>
+
+        <div class="relative h-64">
+            <canvas id="reservationChart"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    let sortDirection = {};
+
+    function sortTable(columnIndex, header) {
+        const table = document.getElementById("reservationTable");
+        const tbody = table.querySelector("tbody");
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+
+        const asc = !sortDirection[columnIndex];
+        sortDirection[columnIndex] = asc;
+
+        rows.sort((a, b) => {
+            let valA = a.children[columnIndex].innerText.trim();
+            let valB = b.children[columnIndex].innerText.trim();
+
+            if (columnIndex === 1) {
+                valA = new Date(valA);
+                valB = new Date(valB);
+            }
+
+            if (valA < valB) return asc ? -1 : 1;
+            if (valA > valB) return asc ? 1 : -1;
+            return 0;
+        });
+
+        tbody.style.opacity = 0;
+        setTimeout(() => {
+            rows.forEach(row => tbody.appendChild(row));
+            tbody.style.opacity = 1;
+        }, 150);
+
+        document.querySelectorAll(".sort-arrow").forEach(el => el.innerHTML = "");
+        header.querySelector(".sort-arrow").innerHTML = asc ? " ▲" : " ▼";
+    }
+
+    /* Live Search */
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+        const filter = this.value.toLowerCase();
+        const rows = document.querySelectorAll("#reservationTable tbody tr");
+
+        rows.forEach(row => {
+            const book = row.children[0].innerText.toLowerCase();
+            row.style.display = book.includes(filter) ? "" : "none";
+        });
+    });
+
+    /* Date Range Filter */
+    function filterByDate() {
+        const start = new Date(document.getElementById("startDate").value);
+        const end = new Date(document.getElementById("endDate").value);
+
+        const rows = document.querySelectorAll("#reservationTable tbody tr");
+
+        rows.forEach(row => {
+            const dateText = row.children[1].innerText;
+            const rowDate = new Date(dateText);
+
+            if ((!isNaN(start) && rowDate < start) ||
+                (!isNaN(end) && rowDate > end)) {
+                row.style.display = "none";
+            } else {
+                row.style.display = "";
+            }
+        });
+    }
+
+    /* Reservation Statistics Chart */
+    const statusCounts = {
+        PENDING: 0,
+        APPROVED: 0,
+        NOT_APPROVED: 0
+    };
+
+    document.querySelectorAll("#reservationTable tbody tr").forEach(row => {
+        const statusCell = row.children[2];
+        if (!statusCell) return;
+
+        const status = statusCell.dataset.status;  // ← key change
+
+        if (statusCounts.hasOwnProperty(status)) {
+            statusCounts[status]++;
+        }
+    });
+
+    new Chart(document.getElementById("reservationChart"), {
+        type: "pie",
+        data: {
+            labels: Object.keys(statusCounts),
+            datasets: [{
+                data: Object.values(statusCounts),
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: "bottom" }
+            }
+        }
+    });
+
+
+    //Reset button  
+
+    function resetFilters() {
+
+        // Clear search
+        document.getElementById("searchInput").value = "";
+
+        // Clear dates
+        document.getElementById("startDate").value = "";
+        document.getElementById("endDate").value = "";
+
+        // Show all rows
+        const rows = document.querySelectorAll("#reservationTable tbody tr");
+        rows.forEach(row => {
+            row.style.display = "";
+        });
+
+    }
+
+</script>

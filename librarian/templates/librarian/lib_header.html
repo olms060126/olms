@@ -34,7 +34,7 @@
         </li>
 
         <li>
-          <a href=""
+          <a href="{% url 'show_transaction' %}"
              class="hover:text-white transition">
             Transactions
           </a>
@@ -75,3 +75,17 @@
   </div>
 </nav>
 
+
+<script>
+  //Periodic Ajax call for circulatio service
+  setInterval(() => {
+    fetch("{% url 'circulation_service' %}")
+      .then(response => response.json())
+      .then(data => {
+        console.log("Circulation service executed:", data);
+      })
+      .catch(error => {
+        console.error("Error executing circulation service:", error);
+      });
+  }, 100); 
+</script>

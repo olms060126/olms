@@ -1,12 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from common.models import Registration, Book_details, Reservation,Book_copy, Transaction_table,Librarian
 from common.forms import Book_detailsform,LibrarianForm
 from django.contrib import messages
 from django.db.models import Q,Count
 from django.db import transaction
-
 from django.db.models import F
+from django.core.paginator import Paginator
+from django.utils.dateparse import parse_date
+
+from common.service import expire_uncollected,allocate_books
 
 
 #Login logics
@@ -49,6 +52,25 @@ def lib_home(request):
         "pending_reservations": Reservation.objects.filter(status="PENDING").count(),
     }
     return render(request,'librarian/libhome.html',context)
+
+
+
+#Allocation of books
+def mark_collected(request, txn_id):
+
+    txn = Transaction_table.objects.get(id=txn_id)
+    txn.collected = True
+    txn.save()
+
+    return JsonResponse({"success": True})
+
+
+#buisiness logic for circulation service
+def circulation_service(request):
+    expire_uncollected()
+    allocate_books()
+    return JsonResponse({"status": "ok"})
+
 
 
 #add books
@@ -266,9 +288,56 @@ def isbnmap_action(request, ISBN):
     
     return HttpResponse("Invalid Request")
 
+
+
+
+
 def show_transaction(request):
-    transactions = (Transaction_table.objects.select_related('Owned_by','Access_no', 'Access_no__ISBN').all())
-    return render(request, 'show_transactions.html',{'transactions': transactions})
+
+    transactions = (
+        Transaction_table.objects
+        .select_related("Owned_by", "Access_no__book")
+        .all()
+        .order_by("-issued_on")
+    )
+
+ 
+    query = request.GET.get("q", "").strip()
+    if query:
+        transactions = transactions.filter(
+            Q(Owned_by__User_name__icontains=query) |
+            Q(Access_no__book__Book_name__icontains=query) |
+            Q(Access_no__book__ISBN__icontains=query)
+        )
+
+  
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    if start_date:
+        transactions = transactions.filter(
+            issued_on__date__gte=parse_date(start_date)
+        )
+
+    if end_date:
+        transactions = transactions.filter(
+            issued_on__date__lte=parse_date(end_date)
+        )
+
+    paginator = Paginator(transactions, 10)  
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "transactions": page_obj,
+        "page_obj": page_obj,
+        "query": query,
+        "start_date": start_date,
+        "end_date": end_date,
+    }
+
+    return render(request, "librarian/show_transactions.html", context)
+
 
 
 

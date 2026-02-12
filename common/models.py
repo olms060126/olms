@@ -4,6 +4,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from datetime import date, timedelta
+from django.utils import timezone
 
 
 from django.db import models
@@ -75,60 +76,58 @@ class Book_copy(models.Model):
 
 #Book reveservation model
 class Reservation(models.Model):
+
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),
-        ('APPROVED', 'Approved'),
-        ('NOT_APPROVED', 'Not Approved'),
+        ('ALLOCATED', 'Allocated'),
+        ('COLLECTED', 'Collected'),
+        ('EXPIRED', 'Expired'),
+        ('CANCELLED', 'Cancelled'),
     ]
 
     student = models.ForeignKey(Registration, on_delete=models.CASCADE)
 
-    # 
     book = models.ForeignKey(
         Book_copy,
         related_name='reservations',
         on_delete=models.CASCADE
     )
+
     reserved_at = models.DateTimeField(auto_now_add=True)
+
+    allocated_at = models.DateTimeField(null=True, blank=True)
+
     status = models.CharField(
-    max_length=20,
-    choices=STATUS_CHOICES,
-    default='PENDING'
-)
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='PENDING'
+    )
 
-    def __str__(self):
-        return f"{self.student.Roll_no}"
-
-
-
+    class Meta:
+        ordering = ['reserved_at']
 
 class Transaction_table(models.Model):
+
     Access_no = models.ForeignKey(
         Book_copy,
         on_delete=models.PROTECT,
-        related_name="transactions",
+        related_name="transactions"
     )
+
     Owned_by = models.ForeignKey(
         Registration,
         on_delete=models.PROTECT,
         related_name="transactions"
     )
-    issued_on = models.DateField(auto_now_add=True)
-    due_date = models.DateField(default=overdue)
-    returned_on = models.DateField(null=True, blank=True)
 
-    STATUS_CHOICES = [
-        ('NOT_RETURNED', 'Not Returned'),
-        ('RETURNED', 'Returned'),
-    ]
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='NOT_RETURNED'
-    )
+    issued_on = models.DateTimeField(auto_now_add=True)
+    collected = models.BooleanField(default=False)
+    returned = models.BooleanField(default=False)
+
+    Due_date = models.DateField(default=overdue)
 
     def __str__(self):
-        return f"{self.Access_no} → {self.Owned_by}"
+        return f"{self.Access_no} - {self.Owned_by}"
 
 
 class Fine_table(models.Model):

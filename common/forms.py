@@ -10,6 +10,15 @@ text_style = {
     "class": "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400"
 }
 
+#login form
+class LoginForm(forms.ModelForm):
+    class Meta:
+        model=Registration
+        fields = ['User_name', 'Password',]
+        widgets={
+            'User_name': forms.TextInput(attrs=text_style),
+            'Password': forms.PasswordInput(attrs=text_style),
+        }
 
 # user registration form
 class Registrationform(forms.ModelForm):

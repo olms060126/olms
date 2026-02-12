@@ -24,5 +24,8 @@ urlpatterns = [
     path('reduceposessed/<str:ISBN>/', views.reduceposessed, name='reduceposessed'),
     path('delete/<str:ISBN>/', views.delete, name='delete'),
     # path('isbnmap', views.isbnmap, name='isbnmap'),
+
+    #circulation service 
+    path("circulation_service/", views.circulation_service, name="circulation_service"),
     
 ]

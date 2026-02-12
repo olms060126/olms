@@ -1,6 +1,6 @@
 {% include 'stdfeature.html' %}
 
-<div class="min-h-screen bg-black text-white px-6 py-10 space-y-12">
+<div class="min-h-screen bg-light text-white px-6 py-10 space-y-12">
 
     <!-- Welcome -->
     <div>
@@ -8,6 +8,47 @@
         <p class="text-gray-400 text-sm mt-1">
             Explore books by genre and manage your activity
         </p>
+    </div>
+
+    
+    <!--  ACTIVITY SUMMARY  -->
+
+    <div class="space-y-6">
+
+        <h2 class="text-2xl font-semibold">Your Activity</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
+                <p class="text-sm text-gray-500">Total Reserved</p>
+                <p class="text-2xl font-bold mt-2">
+                    {{ total_reserved }}
+                </p>
+            </div>
+
+            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
+                <p class="text-sm text-gray-500">Books Issued</p>
+                <p class="text-2xl font-bold mt-2">
+                    {{ total_issued }}
+                </p>
+            </div>
+
+            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
+                <p class="text-sm text-gray-500">Fines Paid</p>
+                <p class="text-2xl font-bold mt-2">
+                    ₹ {{ total_fine_paid }}
+                </p>
+            </div>
+
+            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
+                <p class="text-sm text-gray-500">Pending Fines</p>
+                <p class="text-2xl font-bold mt-2 text-red-600">
+                    ₹ {{ pending_fines }}
+                </p>
+            </div>
+
+        </div>
+
     </div>
 
     <!--  GENRE SECTIONS-->
@@ -18,11 +59,11 @@
 
         <!-- Genre Header -->
         <div class="flex justify-between items-center">
-            <h2 class="text-2xl font-semibold tracking-wide">
+            <h2 class="text-2xl text-green-600 font-semibold tracking-wide">
                 {{ genre }}
             </h2>
 
-            <a href="{% url 'genre_books' genre %}" class="text-sm text-gray-400 hover:text-white transition">
+            <a href="" class="text-sm text-gray-400 hover:text-black transition">
                 Show All →
             </a>
         </div>
@@ -69,7 +110,9 @@
                             Already Reserved
                         </button>
                         {% else %}
-                        <button class="reserve-btn w-full py-2 rounded-lg
+                        <button 
+                        data-url="{% url 'ajax_reserve_book' book.id %}"
+                        class="reserve-btn w-full py-2 rounded-lg
          bg-black text-white text-sm font-semibold
          hover:bg-gray-800 transition" data-book-id="{{ book.id }}">
                             Reserve
@@ -120,45 +163,6 @@
         </div>
     </div>
 
-    <!--  ACTIVITY SUMMARY  -->
-
-    <div class="space-y-6">
-
-        <h2 class="text-2xl font-semibold">Your Activity</h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-
-            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
-                <p class="text-sm text-gray-500">Total Reserved</p>
-                <p class="text-2xl font-bold mt-2">
-                    {{ total_reserved }}
-                </p>
-            </div>
-
-            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
-                <p class="text-sm text-gray-500">Books Issued</p>
-                <p class="text-2xl font-bold mt-2">
-                    {{ total_issued }}
-                </p>
-            </div>
-
-            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
-                <p class="text-sm text-gray-500">Fines Paid</p>
-                <p class="text-2xl font-bold mt-2">
-                    ₹ {{ total_fine_paid }}
-                </p>
-            </div>
-
-            <div class="bg-white text-black rounded-xl p-6 text-center shadow">
-                <p class="text-sm text-gray-500">Pending Fines</p>
-                <p class="text-2xl font-bold mt-2 text-red-600">
-                    ₹ {{ pending_fines }}
-                </p>
-            </div>
-
-        </div>
-
-    </div>
 
 </div>
 
@@ -187,11 +191,11 @@ document.querySelectorAll(".reserve-btn").forEach(button => {
     const bookId = this.dataset.bookId;
     const btn = this;
     const availability = document.getElementById(`availability-${bookId}`);
-
+    const url = this.dataset.url;
     btn.disabled = true;
     btn.innerText = "Processing...";
 
-    fetch(`/ajax/reserve/${bookId}/`, {
+    fetch(url, {
       method: "POST",
       headers: {
         "X-CSRFToken": getCookie("csrftoken"),
@@ -202,6 +206,7 @@ document.querySelectorAll(".reserve-btn").forEach(button => {
     .then(data => {
 
       if (data.success) {
+        window.location.reload();
         btn.innerText = "Already Reserved";
         btn.classList.remove("bg-black");
         btn.classList.add("bg-gray-400");

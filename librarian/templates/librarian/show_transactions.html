@@ -1,0 +1,100 @@
+{% include 'librarian/lib_header.html' %}
+
+<!--wrapper of transaction table-->
+<div class="max-w-7xl mx-auto px-6 py-10">
+    <h1 class="text-2xl font-semibold mb-6">Transaction History</h1>
+
+    <form method="get" class="mb-6 flex flex-wrap gap-4">
+
+        <input type="text" name="q" value="{{ query }}" placeholder="Search student, book or ISBN"
+            class="px-4 py-2 border rounded-lg">
+
+        <input type="date" name="start_date" value="{{ start_date }}" class="px-4 py-2 border rounded-lg">
+
+        <input type="date" name="end_date" value="{{ end_date }}" class="px-4 py-2 border rounded-lg">
+
+        <button type="submit" class="px-4 py-2 bg-black text-white rounded-lg">
+            Filter
+        </button>
+
+    </form>
+
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Student
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Book
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> ISBN
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Type
+                    </th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"> Date
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for transaction in transactions %}
+                <tr>
+                    <td class="px-6 py-4">
+                        {{ transaction.Owned_by.User_name }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        {{ transaction.Access_no.book.Book_name }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        {{ transaction.Access_no.book.ISBN }}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        {% if transaction.returned %}
+                        Returned
+                        {% else %}
+                        Issued
+                        {% endif %}
+                    </td>
+
+                    <td class="px-6 py-4">
+                        {{ transaction.issued_on|date:"M d, Y H:i" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        No transactions found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+        <div class="mt-6 flex justify-center gap-2">
+
+            {% if page_obj.has_previous %}
+            <a href="?page=1&q={{ query }}&start_date={{ start_date }}&end_date={{ end_date }}"
+                class="px-3 py-1 border rounded">First</a>
+
+            <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&start_date={{ start_date }}&end_date={{ end_date }}"
+                class="px-3 py-1 border rounded">Previous</a>
+            {% endif %}
+
+            <span class="px-3 py-1">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&start_date={{ start_date }}&end_date={{ end_date }}"
+                class="px-3 py-1 border rounded">Next</a>
+
+            <a href="?page={{ page_obj.paginator.num_pages }}&q={{ query }}&start_date={{ start_date }}&end_date={{ end_date }}"
+                class="px-3 py-1 border rounded">Last</a>
+            {% endif %}
+
+        </div>
+
+    </div>
+</div>

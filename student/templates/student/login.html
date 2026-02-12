@@ -1,0 +1,63 @@
+
+
+
+
+{% include 'tailwind.html' %}
+
+{% include 'student/messages.html' %}
+
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-indigo-200 p-6">
+
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">OLMS</h1>
+            <p class="text-sm text-gray-500">Online Library Management System</p>
+        </div>
+
+        <h2 class="text-xl font-semibold text-center text-gray-700 mb-6">
+            Student Login
+        </h2>
+
+        <form action="{% url 'student_login' %}" method="POST" class="space-y-5">
+            {% csrf_token %}
+
+            <!-- Username -->
+            <div>
+                {{ forms.User_name.label_tag }}
+                {{ forms.User_name }}
+            </div>
+
+            <!-- Password -->
+            <div>
+                {{ forms.Password.label_tag }}
+                {{ forms.Password }}
+            </div>
+
+            <button type="submit"
+                class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg shadow">
+                Login
+            </button>
+
+            <p class="text-center text-sm text-gray-600">
+                Don’t have an account?
+                <a href="{% url 'register' %}" class="text-indigo-600 hover:underline">
+                    Register
+                </a>
+            </p>
+
+        </form>
+
+    </div>
+</div> 
+
+
+
+
+
+
+
+
+
+
+
