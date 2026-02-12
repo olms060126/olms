@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
-from common.models import Registration, Book_details, Reservation,Book_copy, Transaction_table,Librarian
+from common.models import Registration, Book_details, Reservation,Book_copy, Transaction_table,Librarian,Fine_table
 from common.forms import Book_detailsform,LibrarianForm
 from django.contrib import messages
 from django.db.models import Q,Count
@@ -10,9 +10,11 @@ from django.core.paginator import Paginator
 from django.utils.dateparse import parse_date
 from django.views.decorators.http import require_POST
 from common.util import send_mail
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncMonth
 
 
-from common.service import expire_uncollected,allocate_books
+from common.service import expire_uncollected,allocate_books,send_due_reminders,calculate_fines
 
 
 #Login logics
@@ -150,7 +152,12 @@ def mark_collected(request, txn_id):
 
     except Transaction_table.DoesNotExist:
         return JsonResponse({"success": False}, status=404)
-    
+
+def library_auto_service(request):
+    send_due_reminders()
+    calculate_fines()
+    return JsonResponse({"status":"ok"})
+
 
 
 #buisiness logic for circulation service
@@ -427,6 +434,68 @@ def show_transaction(request):
     return render(request, "librarian/show_transactions.html", context)
 
 
+
+#fine dashbord
+def fine_dashboard(request):
+
+    fines = Fine_table.objects.select_related(
+        "transaction__Owned_by",
+        "transaction__Access_no__book"
+    )
+
+ 
+    total_fines = fines.aggregate(
+        total=Sum("amount_payable")
+    )["total"] or 0
+
+    total_paid = fines.filter(
+        paid=True
+    ).aggregate(total=Sum("amount_payable"))["total"] or 0
+
+    total_unpaid = fines.filter(
+        paid=False
+    ).aggregate(total=Sum("amount_payable"))["total"] or 0
+
+  
+    monthly_data = (
+        fines
+        .annotate(month=TruncMonth("transaction__issued_on"))
+        .values("month")
+        .annotate(total=Sum("amount_payable"))
+        .order_by("month")
+    )
+
+    months = [m["month"].strftime("%b %Y") for m in monthly_data if m["month"]]
+    monthly_totals = [m["total"] for m in monthly_data]
+
+    top_defaulters = (
+        fines.filter(paid=False)
+        .values("transaction__Owned_by__Name")
+        .annotate(total=Sum("amount_payable"))
+        .order_by("-total")[:5]
+    )
+
+    defaulter_names = [
+        d["transaction__Owned_by__Name"]
+        for d in top_defaulters
+    ]
+
+    defaulter_amounts = [
+        d["total"]
+        for d in top_defaulters
+    ]
+
+    context = {
+        "total_fines": total_fines,
+        "total_paid": total_paid,
+        "total_unpaid": total_unpaid,
+        "months": months,
+        "monthly_totals": monthly_totals,
+        "defaulter_names": defaulter_names,
+        "defaulter_amounts": defaulter_amounts,
+    }
+
+    return render(request, "librarian/fine_dashboard.html", context)
 
 
 def librarian_login(request):

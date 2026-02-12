@@ -73,6 +73,8 @@ class Book_copy(models.Model):
 
     def __str__(self):
         return f"{self.book.Book_name}"
+    
+    
 
 
 #Book reveservation model
@@ -107,6 +109,21 @@ class Reservation(models.Model):
     class Meta:
         ordering = ['reserved_at']
 
+    #making sure a student can only have one active reservation per book
+    def save(self, *args, **kwargs):
+        if self.status == 'PENDING':
+            existing = Reservation.objects.filter(
+                student=self.student,
+                book__book=self.book.book,
+                status='PENDING'
+            ).exclude(id=self.id)
+
+            if existing.exists():
+                raise ValueError("You already have a pending reservation for this book.")
+
+        super().save(*args, **kwargs)
+
+
 class Transaction_table(models.Model):
 
     Access_no = models.ForeignKey(
@@ -124,17 +141,35 @@ class Transaction_table(models.Model):
     issued_on = models.DateTimeField(auto_now_add=True)
     collected = models.BooleanField(default=False)
     returned = models.BooleanField(default=False)
+    reminder_sent = models.BooleanField(default=False)
 
     Due_date = models.DateField(default=overdue)
 
     def __str__(self):
         return f"{self.Access_no} - {self.Owned_by}"
+    
+    # making sure a student cant keep multiple copies of the same book
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Only check on creation
+            existing = Transaction_table.objects.filter(
+                Owned_by=self.Owned_by,
+                Access_no__book=self.Access_no.book,
+                returned=False
+
+            )
+
+            if existing.exists():
+                raise ValueError("You already have an active transaction for this book.")
+
+        super().save(*args, **kwargs)
 
 
 class Fine_table(models.Model):
     transaction = models.OneToOneField(
+
         Transaction_table,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name="finetable"
     )
     amount_payable = models.PositiveIntegerField()
     paid = models.BooleanField(default=False)

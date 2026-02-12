@@ -1,0 +1,69 @@
+{% include 'librarian/lib_header.html' %}
+
+<div class="min-h-screen bg-black text-white px-8 py-10 space-y-10">
+
+  <h1 class="text-3xl font-semibold">
+    Fine Financial Report
+  </h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+    <div class="bg-white text-black p-6 rounded-xl shadow">
+      <p class="text-sm text-gray-500">Total Fines Generated</p>
+      <p class="text-3xl font-bold mt-2">
+        ₹ {{ total_fines }}
+      </p>
+    </div>
+
+    <div class="bg-white text-black p-6 rounded-xl shadow">
+      <p class="text-sm text-gray-500">Total Paid</p>
+      <p class="text-3xl font-bold mt-2 text-green-600">
+        ₹ {{ total_paid }}
+      </p>
+    </div>
+
+    <div class="bg-white text-black p-6 rounded-xl shadow">
+      <p class="text-sm text-gray-500">Total Unpaid</p>
+      <p class="text-3xl font-bold mt-2 text-red-600">
+        ₹ {{ total_unpaid }}
+      </p>
+    </div>
+
+  </div>
+
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+    <!-- Monthly Trend -->
+    <div class="bg-white text-black p-6 rounded-xl shadow">
+      <h2 class="text-lg font-semibold mb-4">
+        Monthly Fine Trend
+      </h2>
+      <div class="relative h-72">
+        <canvas id="monthlyChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Paid vs Unpaid -->
+    <div class="bg-white text-black p-6 rounded-xl shadow">
+      <h2 class="text-lg font-semibold mb-4">
+        Paid vs Unpaid
+      </h2>
+      <div class="relative h-72">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  
+  <div class="bg-white text-black p-6 rounded-xl shadow">
+    <h2 class="text-lg font-semibold mb-4">
+      Top Defaulters
+    </h2>
+    <div class="relative h-72">
+      <canvas id="defaulterChart"></canvas>
+    </div>
+  </div>
+
+</div>

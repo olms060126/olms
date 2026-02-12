@@ -40,7 +40,6 @@ def home(request):
 
 
 
-
 def paypage(request):
     return render(request, 'payment.html')
 

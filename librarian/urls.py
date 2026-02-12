@@ -31,6 +31,12 @@ urlpatterns = [
     path("librarian/collect/<int:txn_id>/", views.mark_collected, name="mark_collected"),
     path("librarian/return/<int:txn_id>/", views.mark_returned, name="mark_returned"),
 
+    #fine calculation
+    path("service/library-auto/", views.library_auto_service, name="library_auto"),
+    path("librarian/fines/", views.fine_dashboard, name="fine_dashboard"),
+
+
+
 
     
 ]

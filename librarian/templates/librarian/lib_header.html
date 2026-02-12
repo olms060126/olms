@@ -20,47 +20,34 @@
       <ul class="hidden md:flex items-center gap-8 text-[#E5E7EB] font-medium">
 
         <li>
-          <a href="{% url 'lib_home' %}"
-             class="hover:text-white transition">
+          <a href="{% url 'lib_home' %}" class="hover:text-white transition">
             Home
           </a>
         </li>
 
         <li>
-          <a href="{% url 'listofbooks' %}"
-             class="hover:text-white transition">
+          <a href="{% url 'listofbooks' %}" class="hover:text-white transition">
             Books
           </a>
         </li>
 
         <li>
-          <a href="{% url 'show_transaction' %}"
-             class="hover:text-white transition">
+          <a href="{% url 'show_transaction' %}" class="hover:text-white transition">
             Transactions
           </a>
         </li>
 
-        <li>
-          <a href=""
-             class="hover:text-white transition">
-            Fine Details
-          </a>
-        </li>
+        <a href="{% url 'fine_dashboard' %}" class="hover:text-white transition">
+          Fine Details
+        </a>
 
-        <li>
-          <a href=""
-             class="hover:text-white transition">
-            Reservations
-          </a>
-        </li>
 
         <!-- Divider -->
         <li class="h-6 w-px bg-white/20"></li>
 
         <!-- Logout -->
         <li>
-          <a href="{% url 'lib_logout' %}"
-             class="px-4 py-2 rounded-lg
+          <a href="{% url 'lib_logout' %}" class="px-4 py-2 rounded-lg
                     bg-white text-black
                     font-semibold
                     hover:bg-gray-200 transition">
@@ -78,6 +65,9 @@
 
 <script>
   //Periodic Ajax call for circulatio service
+  // run immediately on page load
+  fetch("{% url 'circulation_service' %}")
+  fetch("{% url 'library_auto' %}")
   setInterval(() => {
     fetch("{% url 'circulation_service' %}")
       .then(response => response.json())
@@ -87,5 +77,16 @@
       .catch(error => {
         console.error("Error executing circulation service:", error);
       });
-  }, 100000); 
+  }, 30000); // every 30 seconds
+
+  setInterval(() => {
+    fetch("{% url 'library_auto' %}")
+      .then(response => response.json())
+      .then(data => {
+        console.log("Fine service executed:", data);
+      })
+      .catch(error => {
+        console.error("Error executing fine service:", error);
+      });
+  }, 30000); // every 30 seonds
 </script>

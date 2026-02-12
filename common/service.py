@@ -1,9 +1,12 @@
-from django.utils import timezone
+
 from datetime import timedelta
 from django.db import transaction
-from .models import Transaction_table,Book_copy,Reservation
+from .models import Transaction_table,Book_copy,Reservation,Fine_table
 from .util import send_mail
+from django.utils import timezone
+from datetime import date
 
+FINE_PER_DAY = 10
 
 def allocate_books():
 
@@ -73,3 +76,61 @@ def expire_uncollected():
         res.book.is_available = True
         res.book.save()
         res.save()
+
+
+
+def calculate_fines():
+
+    today = date.today()
+
+    overdue_transactions = Transaction_table.objects.filter(
+        collected=True,
+        returned=False,
+        Due_date__lt=today
+    )
+
+    for txn in overdue_transactions:
+
+        overdue_days = (today - txn.Due_date).days
+        fine_amount = overdue_days * FINE_PER_DAY
+
+        fine_obj, created = Fine_table.objects.get_or_create(
+            transaction=txn,
+            defaults={"amount_payable": fine_amount}
+        )
+
+        if not created:
+            fine_obj.amount_payable = fine_amount
+            fine_obj.save()
+
+
+def send_due_reminders():
+
+    reminder_date = date.today() + timedelta(days=3)
+
+    transactions = Transaction_table.objects.filter(
+        collected=True,
+        returned=False,
+        Due_date=reminder_date
+    )
+
+    for txn in transactions:
+
+        send_mail(
+            subject="Library Due Reminder",
+            message=f"""
+Dear {txn.Owned_by.Name},
+
+Your book "{txn.Access_no.book.Book_name}"
+is due on {txn.Due_date}.
+
+Fine policy: ₹10 per overdue day.
+
+Please return it on time.
+
+Library Management
+""",
+            from_email="library@yourdomain.com",
+            recipient_list=[txn.Owned_by.email],
+            fail_silently=True,
+        )
