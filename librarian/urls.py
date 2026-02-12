@@ -10,8 +10,6 @@ urlpatterns = [
     #books related urls
     path('librarian/add_book',views.add_book,name="add_book"),
     path("booklist",views.list_books,name='listofbooks'),
-    path('edit-book/<str:ISBN>/', views.edit_book_page, name='edit_book_page'),
-    path('update-book/<str:ISBN>/', views.update_book, name='update_book'),
     
     path("show_transaction", views.show_transaction, name="show_transaction"),
     
@@ -34,6 +32,12 @@ urlpatterns = [
     #fine calculation
     path("service/library-auto/", views.library_auto_service, name="library_auto"),
     path("librarian/fines/", views.fine_dashboard, name="fine_dashboard"),
+
+    #book edit
+    path("book/<str:ISBN>/", views.get_book_data, name="get_book_data"),
+    path("book/update/<str:ISBN>/", views.update_book, name="update_book"),
+
+
 
 
 

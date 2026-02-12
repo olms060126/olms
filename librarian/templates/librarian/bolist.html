@@ -1,7 +1,5 @@
 {% include 'librarian/lib_header.html' %}
 
-
-<!-- Wrapper -->
 <div class="max-w-7xl mx-auto px-6 py-8 space-y-8 text-white">
 
   <!-- Header -->
@@ -17,25 +15,20 @@
   <!-- Search Bar -->
   <div class="relative z-50 flex items-center justify-between gap-6">
 
-    <!-- Left: Add Book -->
     <div class="z-50">
-      <a href="{% url 'add_book' %}" class="inline-flex items-center gap-2
-             px-5 py-3 rounded-xl
-             bg-white text-black font-semibold
-             shadow hover:bg-gray-200 transition">
+      <a href="{% url 'add_book' %}" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
+                bg-white text-black font-semibold
+                shadow hover:bg-gray-200 transition">
         + Add Book
       </a>
     </div>
 
-    <!-- Right: Search -->
     <div class="flex-1 flex justify-end z-40">
       <form method="get" class="flex flex-col sm:flex-row gap-4">
-        <input type="text" name="q" value="{{ query }}" placeholder="Search by ISBN or Book Name" class="px-4 py-3 rounded-xl
-               bg-white text-black
-               focus:outline-none focus:ring-2 focus:ring-black">
-        <button type="submit" class="px-6 py-3 rounded-xl
-               bg-white text-black font-semibold
-               hover:bg-gray-200 transition">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search by ISBN or Book Name" class="px-4 py-3 rounded-xl bg-white text-black
+                      focus:outline-none focus:ring-2 focus:ring-black">
+        <button type="submit" class="px-6 py-3 rounded-xl bg-white text-black font-semibold
+                       hover:bg-gray-200 transition">
           Search
         </button>
       </form>
@@ -43,26 +36,26 @@
 
   </div>
 
-
   <!-- Results -->
-  <div class="bg-white rounded-xl shadow overflow-hidden text-black">
+  <div class="bg-white rounded-xl shadow text-black">
 
-    <!-- Table Header -->
+    <!-- Header -->
     <div class="grid grid-cols-8 gap-4 px-4 py-3 text-xs uppercase tracking-widest bg-gray-100">
       <div>ISBN</div>
       <div>Book Name</div>
       <div>Author</div>
       <div>Genre</div>
-      <div>Number of copies</div>
-      <div>AVailable</div>
+      <div>Copies</div>
+      <div>Available</div>
       <div>Language</div>
+      <div class="text-right">Actions</div>
     </div>
 
-    <!-- Table Body -->
+    <!-- Body -->
     <div class="divide-y">
       {% for book in books %}
       <div class="grid grid-cols-1 md:grid-cols-8 gap-4 px-4 py-4
-            items-center hover:bg-gray-50 transition">
+                  items-center hover:bg-gray-50 transition">
 
         <div class="font-mono text-sm break-all">
           {{ book.ISBN }}
@@ -93,7 +86,8 @@
         </div>
 
         <!-- Actions -->
-        <div class="flex items-center justify-end gap-4 text-sm whitespace-nowrap">
+        <div class="flex items-center justify-end gap-4 text-sm">
+
           <a href="#" class="text-red-600 hover:text-red-800 transition">
             Delete
           </a>
@@ -102,16 +96,156 @@
             Owned By
           </a>
 
-          <a href="#" class="text-blue-600 hover:text-blue-800 transition">
+          <button data-get-url="{% url 'get_book_data' book.ISBN %}" data-update-url="{% url 'update_book' book.ISBN %}"
+            onclick="openEditModal(this)" class="text-blue-600 hover:text-blue-800 transition">
             Edit
-          </a>
+          </button>
+
         </div>
 
       </div>
       {% empty %}
-      <!-- Empty state -->
-      <div class="px-6 py-10 text-center text-gray-500 col-span-full">
+      <div class="px-6 py-10 text-center text-gray-500">
         No books found.
       </div>
       {% endfor %}
     </div>
+
+  </div>
+</div>
+
+
+
+<div id="editModal" class="fixed inset-0 bg-transparent bg-opacity-50 hidden
+            flex items-center justify-center z-50">
+
+  <div class="bg-white text-black rounded-2xl p-8 w-[500px] shadow-xl">
+
+    <h2 class="text-xl font-semibold mb-6">
+      Edit Book
+    </h2>
+
+    <form id="editBookForm" class="space-y-4">
+      {% csrf_token %}
+
+      <input type="hidden" id="editBookId">
+
+      <input type="text" id="editBookName" name="bookname" class="w-full border rounded-lg px-4 py-2" placeholder="Book Name" required>
+
+      <input type="text" id="editAuthor" name="auther" class="w-full border rounded-lg px-4 py-2" placeholder="Author" required>
+
+      <select id="editLanguage"  name="language" class="w-full border rounded-lg px-4 py-2" required>
+        <option value="">Select Language</option>
+        <option value="English">English</option>
+        <option value="Malayalam">Malayalam</option>
+        <option value="French">French</option>
+        <option value="German">German</option>
+        <option value="Chinese">Chinese</option>
+      </select>
+
+      <select id="editGenre" name="genre" class="w-full border rounded-lg px-4 py-2" required>
+        <option value="">Select Genre</option>
+        <option value="horror">Horror</option>
+        <option value="poems">Poems</option>
+        <option value="novel">Novel</option>
+        <option value="examoriented">Exam Oriented</option>
+      </select>
+
+      <div class="flex justify-end gap-4 pt-4">
+        <button type="button" onclick="closeEditModal()" class="px-4 py-2 border rounded-lg">
+          Cancel
+        </button>
+
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+          Save Changes
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+
+
+<script>
+  let currentUpdateUrl = null;
+
+  function getCookie(name) {
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+
+        if (cookie.startsWith(name + '=')) {
+          cookieValue = decodeURIComponent(
+            cookie.substring(name.length + 1)
+          );
+          break;
+        }
+      }
+    }
+
+    return cookieValue;
+  }
+
+
+
+  function openEditModal(button) {
+
+    const getUrl = button.dataset.getUrl;
+    currentUpdateUrl = button.dataset.updateUrl;
+
+    fetch(getUrl)
+      .then(res => res.json())
+      .then(data => {
+
+        document.getElementById("editBookId").value = data.id;
+        document.getElementById("editBookName").value = data.Book_name;
+        document.getElementById("editAuthor").value = data.Authors_name;
+        document.getElementById("editGenre").value = data.Genre;
+        document.getElementById("editLanguage").value = data.Language;
+
+        document.getElementById("editModal")
+          .classList.remove("hidden");
+      });
+  }
+
+  function closeEditModal() {
+    document.getElementById("editModal")
+      .classList.add("hidden");
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+
+    const form = document.getElementById("editBookForm");
+
+    if (!form) return;
+
+    form.addEventListener("submit", function (e) {
+
+      e.preventDefault();
+
+      const formData = new FormData(this);
+
+      fetch(currentUpdateUrl, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: formData
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            closeEditModal();
+            window.location.reload();
+          }
+        });
+
+    });
+
+  });
+</script>

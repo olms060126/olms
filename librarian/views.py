@@ -149,6 +149,35 @@ def mark_returned(request, txn_id):
 #Allocation of books
 
 
+#edit
+def get_book_data(request, ISBN):
+
+    book = get_object_or_404(Book_details, ISBN=ISBN)
+
+    return JsonResponse({
+        "id": book.id,
+        "Book_name": book.Book_name,
+        "Authors_name": book.Authors_name,
+        "Genre": book.Genre,
+        "Language": book.Language,
+    })
+
+
+
+
+@require_POST
+def update_book(request, ISBN):
+
+    book = get_object_or_404(Book_details, ISBN=ISBN)
+
+    book.Book_name = request.POST.get("bookname")
+    book.Authors_name = request.POST.get("auther")
+    book.Genre = request.POST.get("genre")
+    book.Language = request.POST.get("language")
+
+    book.save()
+
+    return JsonResponse({"success": True})
 def pay_fine(request, txn_id):
 
     txn = get_object_or_404(Transaction_table, id=txn_id)
@@ -343,30 +372,6 @@ def delete(request, ISBN):
     if request.method=='POST':
         book.delete()
     return redirect("bolist")
-
-
-
-
-
-def edit_book_page(request, ISBN):
-    book = get_object_or_404(Book_details, ISBN=ISBN)
-    form = Book_detailsform()
-    return render(request, 'edit_book.html', {'form': form, 'book': book})
-
-def update_book(request, ISBN):
-    book = get_object_or_404(Book_details, ISBN=ISBN)
-
-    if request.method == "POST":
-        form = Book_detailsform(request.POST,)
-        if form.is_valid():
-            form.save()
-            return redirect('bolist')  
-
-    
-    form = Book_detailsform(request.POST,)
-    return render(request, 'librarian/edit_book.html', {'form': form, 'book': book})
-
-
 
 
 
