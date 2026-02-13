@@ -106,6 +106,7 @@ def calculate_fines():
             fine_obj.save()
 
 
+
 def send_due_reminders():
 
     reminder_date = date.today() + timedelta(days=3)
