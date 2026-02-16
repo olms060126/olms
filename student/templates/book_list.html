@@ -1,27 +1,4 @@
-{% comment %} {% include 'stdfeature.html' %}
-<h1>Books</h1>
 
-<table border="1">
-    <tr>
-        <th>Book</th>
-        <th>Author</th>
-        <th>Available</th>
-        <th>Genre</th>
-        <th>Reserve</th>
-    </tr>
-
-    {% for b in books %}
-    <tr>
-        <td>{{ b.Book_name }}</td>
-        <td>{{ b.Authors_name }}</td>
-        <td>{{ b.Available_books }}</td>
-        <td>{{ b.Genre }}</td>
-        <td>
-        <a href="{% url 'reserve_book_manual' b.ISBN %}">Reserve</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table> {% endcomment %}
 
 
 {% include 'stdfeature.html' %}

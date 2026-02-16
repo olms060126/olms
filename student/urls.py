@@ -20,6 +20,7 @@ urlpatterns = [
 
     path("face-login/", views.face_login, name="face_login"),
     path("password-reset/", views.password_reset, name="password_reset"),
+    path("student-online-books/", views.online_books_students, name="online_books_students"),
 
 
 

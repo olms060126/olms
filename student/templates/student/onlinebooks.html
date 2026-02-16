@@ -1,0 +1,95 @@
+{% include 'stdfeature.html' %}
+
+<div class="min-h-screen bg-gray-100 p-8">
+
+    <div class="max-w-7xl mx-auto">
+
+        <h1 class="text-3xl font-bold mb-6">Online Books</h1>
+
+        <!-- Search -->
+        <form method="GET" class="mb-6 flex gap-4">
+            <input type="text"
+                   name="search"
+                   value="{{ search_query }}"
+                   placeholder="Search by title, author, genre..."
+                   class="flex-1 px-4 py-2 rounded-lg border focus:ring-2 focus:ring-indigo-500">
+
+            <button class="px-6 py-2 bg-indigo-600 text-white rounded-lg">
+                Search
+            </button>
+        </form>
+
+        <!-- Book Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            {% for book in books %}
+            <div class="bg-white rounded-2xl shadow p-4 flex flex-col">
+
+                {% if book.cover %}
+                    <img src="{{ book.cover.url }}"
+                         class="w-full h-48 object-cover rounded mb-3">
+                {% else %}
+                    <div class="w-full h-48 bg-gray-200 rounded mb-3 flex items-center justify-center">
+                        No Cover
+                    </div>
+                {% endif %}
+
+                <h3 class="text-lg font-semibold mb-1">
+                    {{ book.title }}
+                </h3>
+
+                <p class="text-sm text-gray-500 mb-2">
+                    {{ book.auther }} | {{ book.genre }}
+                </p>
+
+                <p class="text-sm text-gray-600 flex-grow">
+                    {{ book.description|truncatewords:20 }}
+                </p>
+
+                <div class="mt-4 flex justify-between items-center">
+
+                    <a href="{{ book.file.url }}"
+                       target="_blank"
+                       class="text-indigo-600 text-sm hover:underline">
+                        Preview
+                    </a>
+
+                    <a href="{{ book.file.url }}"
+                       download
+                       class="bg-indigo-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-indigo-700">
+                        Download
+                    </a>
+
+                </div>
+
+            </div>
+            {% empty %}
+                <p>No books found.</p>
+            {% endfor %}
+
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-8 flex justify-center gap-2">
+            {% if books.has_previous %}
+                <a href="?page={{ books.previous_page_number }}&search={{ search_query }}"
+                   class="px-3 py-1 bg-gray-200 rounded">
+                    Prev
+                </a>
+            {% endif %}
+
+            <span class="px-3 py-1 bg-indigo-600 text-white rounded">
+                {{ books.number }}
+            </span>
+
+            {% if books.has_next %}
+                <a href="?page={{ books.next_page_number }}&search={{ search_query }}"
+                   class="px-3 py-1 bg-gray-200 rounded">
+                    Next
+                </a>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>

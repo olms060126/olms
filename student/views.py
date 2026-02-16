@@ -1,7 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse
-from common.models import Book_details, Reservation, Registration,Book_details, Book_copy, Reservation,Fine_table, Transaction_table
+from common.models import (
+    Book_details, 
+    Reservation, 
+    Registration,
+    Book_details, 
+    Book_copy, Reservation,Fine_table, Transaction_table,Books_online_copies)
 from common.forms import Registrationform, Book_detailsform,LoginForm
 from datetime import date, timedelta
 from django.http import HttpResponse
@@ -22,6 +27,8 @@ from django.http import HttpResponseRedirect
 from common.util import send_mail
 import random
 from django.shortcuts import render
+from django.core.paginator import Paginator
+from django.db.models import Q
 
 
 
@@ -351,6 +358,35 @@ def sthome(request):
     }
 
     return render(request, "homestudent.html", context)
+
+
+
+def online_books_students(request):
+
+    search_query = request.GET.get("search", "")
+
+    books = Books_online_copies.objects.all()
+
+    # Search functionality
+    if search_query:
+        books = books.filter(
+            Q(title__icontains=search_query) |
+            Q(auther__icontains=search_query) |
+            Q(genre__icontains=search_query) |
+            Q(language__icontains=search_query)
+        )
+
+    # Pagination
+    paginator = Paginator(books, 6)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "books": page_obj,
+        "search_query": search_query,
+    }
+
+    return render(request, "student/onlinebooks.html", context)
 
 
 def stlogout(request):
