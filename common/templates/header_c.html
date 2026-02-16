@@ -1,39 +1,3 @@
-{% comment %} {% load static %}
-
-<header class="bg-[#5a4636] shadow">
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <nav class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-
-        <a href="{% url 'home' %}">
-            <img src="{% static 'logo.jpg' %}" 
-                 alt="Logo" 
-                 class="h-20 w-20 mr-3 rounded-lg border border-[#c8ab89]" />
-        </a>
-
-        <h1 class="text-2xl font-bold text-[#f7f0e3] tracking-wide">
-            OLMS Portal
-        </h1>
-
-        <div class="space-x-4">
-
-            <a href="{% url 'register' %}"
-               class="px-4 py-2 text-sm font-medium 
-                      bg-[#c8ab89] text-[#3a2b23] 
-                      rounded-xl hover:bg-[#b79a7b] transition">
-                Register
-            </a>
-
-            <a href="{% url 'login' %}"
-               class="px-4 py-2 text-sm font-medium 
-                      border border-[#c8ab89] text-[#f7f0e3] 
-                      rounded-xl hover:bg-[#6a5241] transition">
-                Login
-            </a>
-
-        </div>
-    </nav>
-</header> {% endcomment %}
 {% load static %}
 
 <header class="bg-[#d7c1a3] shadow-[0_2px_6px_rgba(120,85,60,0.4)]">
