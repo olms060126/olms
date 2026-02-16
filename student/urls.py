@@ -19,6 +19,8 @@ urlpatterns = [
     path("save-face/<str:roll_no>/", views.save_face_encoding, name="save_face"),
 
     path("face-login/", views.face_login, name="face_login"),
+    path("password-reset/", views.password_reset, name="password_reset"),
+
 
 
 ]

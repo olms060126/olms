@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.urls import reverse
 from common.models import Book_details, Reservation, Registration,Book_details, Book_copy, Reservation,Fine_table, Transaction_table
 from common.forms import Registrationform, Book_detailsform,LoginForm
 from datetime import date, timedelta
@@ -17,6 +18,11 @@ import base64
 import pickle
 import cv2
 from scipy.spatial.distance import cosine
+from django.http import HttpResponseRedirect
+from common.util import send_mail
+import random
+from django.shortcuts import render
+
 
 
 def student_login(request):
@@ -177,6 +183,74 @@ def cancel_reservation(request, res_id):
     reservation.save()
 
     return JsonResponse({"success": True})   
+
+
+def password_reset(request):
+
+    stage = request.POST.get("stage", "email")
+
+    if request.method == "POST":
+
+    
+        if stage == "email":
+
+            email = request.POST.get("email")
+
+            try:
+                user = Registration.objects.get(email=email)
+
+                otp = random.randint(100000, 999999)
+
+                request.session["reset_email"] = email
+                request.session["reset_otp"] = str(otp)
+
+                send_mail(
+                    reseiver=email,
+                    subject="Password Reset OTP",
+                    body=f"Your OTP for password reset is: {otp}",
+                          )
+
+                messages.success(request, "OTP sent to your email.")
+                return render(request, "student/password_reset.html", {"stage": "otp"})
+
+            except Registration.DoesNotExist:
+                messages.error(request, "Email not registered.")
+
+        
+        elif stage == "otp":
+
+            entered_otp = request.POST.get("otp")
+            session_otp = request.session.get("reset_otp")
+
+            if entered_otp == session_otp:
+                messages.success(request, "OTP verified. Set new password.")
+                return render(request, "student/password_reset.html", {"stage": "new_password"})
+            else:
+                messages.error(request, "Invalid OTP.")
+                return render(request, "student/password_reset.html", {"stage": "otp"})
+
+        
+        elif stage == "new_password":
+
+            new_password = request.POST.get("new_password")
+            email = request.session.get("reset_email")
+
+            try:
+                user = Registration.objects.get(email=email)
+                user.Password = new_password
+                user.save()
+
+                request.session.pop("reset_otp", None)
+                request.session.pop("reset_email", None)
+
+                messages.success(request, "Password reset successful.")
+                return HttpResponseRedirect(reverse("student_login"))
+
+            except Registration.DoesNotExist:
+                messages.error(request, "Something went wrong.")
+
+    return render(request, "student/password_reset.html", {"stage": "email"})
+
 
 
 
