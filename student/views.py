@@ -11,41 +11,155 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.db import transaction
+from deepface import DeepFace
+import numpy as np
+import base64
+import pickle
+import cv2
+from scipy.spatial.distance import cosine
 
 
 def student_login(request):
-    forms = LoginForm()
+
+    form = LoginForm()
+
     if request.method == "POST":
 
-        User_name= request.POST.get('User_name')
-        Password= request.POST.get('Password')
-        
+        email = request.POST.get('email')
+        Password = request.POST.get('Password')
 
         try:
-            user= Registration.objects.get(User_name=User_name,Password=Password)
-            request.session['Roll_no']=user.Roll_no
-            request.session['User_name']=user.User_name
-            return redirect("sthome")      
+            user = Registration.objects.get(email=email, Password=Password)
+
+            request.session['Roll_no'] = user.Roll_no
+            request.session['email'] = user.email
+
+            return redirect("sthome")
 
         except Registration.DoesNotExist:
-               messages.error(request,"invalid username or password")
-    return render(request,"student/login.html",{'forms':forms})
+            messages.error(request, "Invalid username or password")
+
+    return render(request, "student/login.html", {'forms': form})
+
+
+def face_login(request):
+
+    if request.method == "POST":
+
+        email = request.POST.get("email")
+        image_data = request.POST.get("image")
+
+        try:
+            user = Registration.objects.get(email=email)
+
+            if not user.face_encoding:
+                return JsonResponse({
+                    "status": "no_face",
+                    "message": "No face registered. Please use password."
+                })
+
+            format, imgstr = image_data.split(';base64,')
+            image_bytes = base64.b64decode(imgstr)
+
+            np_arr = np.frombuffer(image_bytes, np.uint8)
+            frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+            embedding_obj = DeepFace.represent(
+                frame,
+                model_name="ArcFace",
+                enforce_detection=True
+            )
+
+            new_embedding = embedding_obj[0]["embedding"]
+            stored_embedding = pickle.loads(user.face_encoding)
+
+            from scipy.spatial.distance import cosine
+            distance = cosine(stored_embedding, new_embedding)
+
+            if distance < 0.5:
+
+                request.session['Roll_no'] = user.Roll_no
+                request.session['User_name'] = user.Name
+
+                return JsonResponse({
+                    "status": "success",
+                    "redirect_url": "/sthome/"
+                })
+
+            else:
+                return JsonResponse({
+                    "status": "fail",
+                    "message": "Face not recognized"
+                })
+
+        except Registration.DoesNotExist:
+            return JsonResponse({
+                "status": "fail",
+                "message": "User not found"
+            })
 
 
 
+#Save the user registration first then redirecting to face registration
 
 def register(request):
     if request.method == "POST":
         form = Registrationform(request.POST)
+
         if form.is_valid():
-            form.save()
-            return redirect("student_login") 
+            user = form.save(commit=False)
+            user.Password = form.cleaned_data['Password']
+
+            user.save()
+
+            messages.success(request, "Account created. Please register your face.")
+            return redirect("face_register", roll_no=user.Roll_no)
+
         else:
             messages.error(request, "Registration failed")
+
     else:
         form = Registrationform()
 
     return render(request, "student/registration.html", {"forms": form})
+
+def face_register_page(request, roll_no):
+    user = get_object_or_404(Registration, Roll_no=roll_no)
+    return render(request, "student/face_register.html", {"user": user})
+
+
+#Ajax end point to save face encoding
+def save_face_encoding(request, roll_no):
+
+    if request.method == "POST":
+        user = get_object_or_404(Registration, Roll_no=roll_no)
+
+        image_data = request.POST.get("image")
+
+        try:
+            format, imgstr = image_data.split(';base64,')
+            image_bytes = base64.b64decode(imgstr)
+
+            np_arr = np.frombuffer(image_bytes, np.uint8)
+            frame = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+            embedding_obj = DeepFace.represent(
+                frame,
+                model_name="ArcFace",
+                enforce_detection=True
+            )
+
+            embedding = embedding_obj[0]["embedding"]
+
+            # store as binary
+            user.face_encoding = pickle.dumps(embedding)
+            user.save()
+
+            return JsonResponse({"status": "success"})
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
+
 
 
 #js call to cancel reservation
@@ -69,8 +183,9 @@ def cancel_reservation(request, res_id):
 def sthome(request):
 
     
-    student_logged = request.session.get('User_name') 
-    student = get_object_or_404(Registration,User_name=student_logged)
+
+    student_logged = request.session.get('email') 
+    student = get_object_or_404(Registration,email=student_logged)
     books = (
         Book_details.objects
         .annotate(
@@ -89,7 +204,14 @@ def sthome(request):
         )
     )
 
-    
+    query = request.GET.get("q","")
+    if query:
+        books = books.filter(
+            Q(Book_name__icontains=query)|
+            Q(Authors_name__icontains=query)|
+            Q(Genre__icontains=query)
+
+        )
 
    
     
@@ -178,8 +300,6 @@ def book_list(request):
 
         
     
-
-
 
 
 

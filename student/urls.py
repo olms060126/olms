@@ -15,5 +15,11 @@ urlpatterns = [
     path('registration_success',views.registration_success, name="registration_success"),
     path('student/cancel_reservation/<int:res_id>',views.cancel_reservation, name="cancel_reservartion"),
 
+    path("face-register/<str:roll_no>/", views.face_register_page, name="face_register"),
+    path("save-face/<str:roll_no>/", views.save_face_encoding, name="save_face"),
+
+    path("face-login/", views.face_login, name="face_login"),
+
+
 ]
 

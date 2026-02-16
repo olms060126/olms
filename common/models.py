@@ -1,6 +1,6 @@
 
 
-
+import pickle
 from django.db import models
 from django.core.validators import MinValueValidator
 from datetime import date, timedelta
@@ -19,6 +19,16 @@ def overdue():
 
 # Registration model + login details
 class Registration(models.Model):
+    roles = [
+        ('STUDENT', 'student'),
+        ('TEACHER', 'teacher'),
+    ]
+    department_choice = [
+        ('CSE', 'Computer Science and Engineering'),
+        ('BCOM', 'Bachelor of Commerce'),
+    ]
+    roles = models.CharField(max_length=20, choices=roles)
+    department = models.CharField(max_length=50, choices=department_choice)
     Roll_no = models.CharField(max_length=25, primary_key=True)
     User_name = models.CharField(max_length=50,unique=True)
     Password = models.CharField(max_length=50)
@@ -26,6 +36,7 @@ class Registration(models.Model):
     Phn_no = models.IntegerField(unique=True)
     Batch = models.CharField(max_length=20)
     email = models.EmailField(unique=True)
+    face_encoding = models.BinaryField(null=True, blank=True)
 
     def __str__(self):
         return self.Name

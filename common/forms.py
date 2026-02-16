@@ -13,30 +13,13 @@ text_style = {
 class LoginForm(forms.ModelForm):
     class Meta:
         model=Registration
-        fields = ['User_name', 'Password',]
+        fields = ['email', 'Password',]
         widgets={
-            'User_name': forms.TextInput(attrs=text_style),
+            'email': forms.TextInput(attrs=text_style),
             'Password': forms.PasswordInput(attrs=text_style),
         }
 
-# user registration form
-# class Registrationform(forms.ModelForm):
-#     class Meta:
-#         model = Registration
-#         fields = ['Roll_no', 'User_name', 'Password', 'Name', 'Phn_no', 'Batch','email']
 
-#         widgets = {
-#             'Roll_no': forms.TextInput(attrs={
-#                 **text_style,
-                
-#             }),
-#             'User_name': forms.TextInput(attrs=text_style),
-#             'Password': forms.PasswordInput(attrs=text_style),
-#             'Name': forms.TextInput(attrs=text_style),
-#             'Phn_no': forms.NumberInput(attrs=text_style),
-#             'Batch': forms.TextInput(attrs=text_style),
-#             'email': forms.EmailInput(attrs=text_style),
-#         }
 
 
 
@@ -57,7 +40,7 @@ class Registrationform(forms.ModelForm):
 
     class Meta:
         model = Registration
-        fields = ['Roll_no', 'User_name', 'Password', 'Name', 'Phn_no', 'Batch', 'email']
+        fields = ['roles','department','Roll_no', 'User_name', 'Password', 'Name', 'Phn_no', 'Batch', 'email']
 
         labels = {
             'Roll_no': 'Roll Number',
@@ -77,6 +60,7 @@ class Registrationform(forms.ModelForm):
             'Phn_no': forms.TextInput(attrs=text_style),
             'Batch': forms.TextInput(attrs=text_style),
             'email': forms.EmailInput(attrs=text_style),
+
         }
 
     # Field-level validation
