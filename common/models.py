@@ -30,7 +30,6 @@ class Registration(models.Model):
     roles = models.CharField(max_length=20, choices=roles)
     department = models.CharField(max_length=50, choices=department_choice)
     Roll_no = models.CharField(max_length=25, primary_key=True)
-    User_name = models.CharField(max_length=50,unique=True)
     Password = models.CharField(max_length=50)
     Name = models.CharField(max_length=50)
     Phn_no = models.IntegerField(unique=True)
@@ -65,7 +64,16 @@ class Book_details(models.Model):
 
     def __str__(self):
         return f"{self.Book_name} ({self.ISBN})"
-    
+
+
+class Books_online_copies(models.Model):
+    title = models.CharField(max_length = 50)
+    cover = models.ImageField(upload_to='covers/', null=True, blank = True)
+    auther = models.CharField(max_length=50)
+    genre = models.CharField(max_length=50)
+    language = models.CharField(max_length=50)
+    description =  models.TextField(null = True , blank=True)
+    file = models.FileField(upload_to='ebooks/')
 
 #Number of physical copies of the book
 class Book_copy(models.Model):

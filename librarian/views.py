@@ -1,7 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
-from common.models import Registration, Book_details, Reservation,Book_copy, Transaction_table,Librarian,Fine_table
-from common.forms import Book_detailsform,LibrarianForm
+from common.models import (
+    Registration,
+      Book_details,
+        Reservation,
+        Book_copy,
+          Transaction_table,
+          Librarian,
+          Fine_table,Books_online_copies)
+from common.forms import Book_detailsform,LibrarianForm,BooksOnlineForm
 from django.contrib import messages
 from django.db.models import Q,Count
 from django.db import transaction
@@ -299,7 +306,62 @@ def list_books(request):
     return render(request, "librarian/bolist.html", context)
 
 
+def online_books(request):
 
+    search_query = request.GET.get("search", "")
+    genre_filter = request.GET.get("genre", "")
+    edit_id = request.GET.get("edit")
+    delete_id = request.GET.get("delete")
+
+    # Delete
+    if delete_id:
+        Books_online_copies.objects.filter(id=delete_id).delete()
+        return redirect("online_books")
+
+    # Edit
+    if edit_id:
+        book_instance = get_object_or_404(Books_online_copies, id=edit_id)
+    else:
+        book_instance = None
+
+    if request.method == "POST":
+        form = BooksOnlineForm(request.POST, request.FILES, instance=book_instance)
+        if form.is_valid():
+            form.save()
+            return redirect("online_books")
+    else:
+        form = BooksOnlineForm(instance=book_instance)
+
+    books = Books_online_copies.objects.all()
+
+    # Search
+    if search_query:
+        books = books.filter(title__icontains=search_query)
+
+    # Genre Filter
+    if genre_filter:
+        books = books.filter(genre=genre_filter)
+
+    # Stats
+    total_books = books.count()
+    genre_stats = Books_online_copies.objects.values("genre").annotate(count=Count("id"))
+
+    # Pagination
+    paginator = Paginator(books, 4)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "form": form,
+        "books": page_obj,
+        "total_books": total_books,
+        "genre_stats": genre_stats,
+        "search_query": search_query,
+        "genre_filter": genre_filter,
+        "edit_book": book_instance,
+    }
+
+    return render(request, "librarian/online_books.html", context)
 
 
 

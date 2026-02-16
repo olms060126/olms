@@ -3,8 +3,10 @@ from django import forms
 from django.core.validators import RegexValidator, EmailValidator
 from common.models import (
     Registration, Book_details, Reservation,
-    Transaction_table, Fine_table, Book_copy,Librarian
+    Transaction_table, Fine_table, Book_copy,Librarian,Books_online_copies
 )
+
+from django.core.exceptions import ValidationError
 
 
 text_style = {
@@ -40,11 +42,10 @@ class Registrationform(forms.ModelForm):
 
     class Meta:
         model = Registration
-        fields = ['roles','department','Roll_no', 'User_name', 'Password', 'Name', 'Phn_no', 'Batch', 'email']
+        fields = ['roles','department','Roll_no', 'Password', 'Name', 'Phn_no', 'Batch', 'email']
 
         labels = {
-            'Roll_no': 'Roll Number',
-            'User_name': 'Username',
+            'Roll_no': 'staff id/ roll number',
             'Password': 'Password',
             'Name': 'Full Name',
             'Phn_no': 'Phone Number',
@@ -54,7 +55,6 @@ class Registrationform(forms.ModelForm):
 
         widgets = {
             'Roll_no': forms.TextInput(attrs=text_style),
-            'User_name': forms.TextInput(attrs=text_style),
             'Password': forms.PasswordInput(attrs=text_style),
             'Name': forms.TextInput(attrs=text_style),
             'Phn_no': forms.TextInput(attrs=text_style),
@@ -103,6 +103,33 @@ class Book_detailsform(forms.ModelForm):
             field.widget.attrs.update({
                 'class': 'w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-black'
             })
+
+
+class BooksOnlineForm(forms.ModelForm):
+
+    class Meta:
+        model = Books_online_copies
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': 'w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-black'
+            })
+
+    def clean_file(self):
+        file = self.cleaned_data.get("file")
+        if file:
+                if not file.name.endswith(".pdf"):
+                    raise ValidationError("Only PDF files allowed.")
+                if file.size > 20 * 1024 * 1024:
+                    raise ValidationError("File size must be under 20MB.")
+
+        return file
+
+
 
 
 
