@@ -92,11 +92,11 @@ def face_login(request):
             if distance < 0.5:
 
                 request.session['Roll_no'] = user.Roll_no
-                request.session['User_name'] = user.Name
+                request.session['email'] = user.email
 
                 return JsonResponse({
                     "status": "success",
-                    "redirect_url": "/sthome/"
+                    "redirect_url": "/student/sthome/"
                 })
 
             else:
@@ -262,10 +262,8 @@ def password_reset(request):
 
 
 def sthome(request):
-
-    
-
-    student_logged = request.session.get('email') 
+    student_logged = request.session.get('email')
+    print(student_logged)
     student = get_object_or_404(Registration,email=student_logged)
     books = (
         Book_details.objects

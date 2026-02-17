@@ -448,8 +448,9 @@ def reduceposessed(request, ISBN):
 def delete(request, ISBN):
     book=get_object_or_404(Book_details, ISBN=ISBN)
     if request.method=='POST':
+        print("deleting book")
         book.delete()
-    return redirect("bolist")
+    return JsonResponse({"success": True})
 
 
 
