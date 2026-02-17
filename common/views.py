@@ -11,16 +11,6 @@ from django.views.decorators.csrf import csrf_exempt
 from .models import Book_details
 
 
-# def home(request):
-#     books = Book_details.objects.all()
-
-#     # use local placeholder stored in static/images/
-#     placeholder_image = "images/placeholder.png"
-
-#     return render(request, "home.html", {
-#         "books": books,
-#         "placeholder": placeholder_image,
-#     })
 
 def home(request):
     books = Book_details.objects.all()
@@ -36,6 +26,9 @@ def home(request):
         "placeholder": placeholder_image,
         "new_arrivals": new_arrivals,
     })
+
+
+
 
 
 

@@ -37,6 +37,7 @@ urlpatterns = [
     path("book/<str:ISBN>/", views.get_book_data, name="get_book_data"),
     path("book/update/<str:ISBN>/", views.update_book, name="update_book"),
     path("online-books/", views.online_books, name="online_books"),
+    path("owned_by<str:ISBN>/",views.owned_by,name="owned_by")
 
 
 

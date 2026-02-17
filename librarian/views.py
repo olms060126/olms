@@ -364,6 +364,22 @@ def online_books(request):
     return render(request, "librarian/online_books.html", context)
 
 
+def owned_by(request, ISBN):
+    book = get_object_or_404(Book_details, ISBN=ISBN)
+
+    transactions = Transaction_table.objects.filter(
+        Access_no__book=book,
+        collected=True,
+        returned=False
+    ).select_related("Owned_by")
+
+    context = {
+        "book": book,
+        "transactions": transactions
+    }
+
+    return render(request, "librarian/owned_by.html", context)
+
 
 def approve_reservation(request, id):
     reservation= get_object_or_404(Reservation, id=id)
